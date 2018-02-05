@@ -87,7 +87,7 @@ coverageRate <- function(coverage, txdb, genome,
     exon.s <- exon.s[seqnames]
     seqRle <- seqRle[seqnames]
     exon.unlist <- 
-        if(class(exon.s)!="GRangesList") GRangesList(exon.s) else exon.s
+        if(!is(exon.s, "GRangesList")) GRangesList(exon.s) else exon.s
     exon.unlist <- unlist(exon.s)
     
     exon.cvg <- lapply(coverage, feature.cvg, feature=exon.s, 
@@ -119,7 +119,7 @@ coverageRate <- function(coverage, txdb, genome,
     }
     UTR3.s <- UTR3.s[seqnames]
     seqRle <- seqRle[seqnames]
-    UTR3.unlist <- if(class(UTR3.s)!="GRangesList") GRangesList(UTR3.s) else UTR3.s
+    UTR3.unlist <- if(!is(UTR3.s, "GRangesList")) GRangesList(UTR3.s) else UTR3.s
     UTR3.unlist <- unlist(UTR3.s)
     
     UTR3.cvg <- lapply(coverage, feature.cvg, feature=UTR3.s, 
