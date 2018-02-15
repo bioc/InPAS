@@ -27,7 +27,7 @@ PAscore(seqname, pos, str, idx, PWM, genome, ups = 50, dws = 50)
     polyA position weight matrix
 }
   \item{genome}{
-    an object of \link[BSgenome]{BSgenome}
+    an object of \link[BSgenome:BSgenome-class]{BSgenome}
 }
   \item{ups}{
     upstream base

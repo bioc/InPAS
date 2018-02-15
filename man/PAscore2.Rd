@@ -27,7 +27,7 @@ PAscore2(seqname, pos, str, idx, idx.gp, genome, classifier, classifier_cutoff)
     group number of the offset postion
 }
   \item{genome}{
-    an object of \link[BSgenome]{BSgenome}
+    an object of \link[BSgenome:BSgenome-class]{BSgenome}
 }
   \item{classifier}{
     a cleanUpdTSeq classifier

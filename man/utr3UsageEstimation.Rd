@@ -20,7 +20,7 @@
     \item{CPsites}{outputs of \link{CPsites}}
     \item{coverage}{coverage for each sample, outputs of 
         \link{coverageFromBedGraph}}
-    \item{genome}{an object of \link[BSgenome]{BSgenome}}
+    \item{genome}{an object of \link[BSgenome:BSgenome-class]{BSgenome}}
     \item{utr3}{output of \link{utr3Annotation}}
     \item{gp1}{tag names involved in group 1}
     \item{gp2}{tag names involved in group 2}
@@ -33,7 +33,7 @@
         PAS(polyadenylation signal) usage index}
     \item{PDUI_logFC_cutoff}{cutoff value for log2 fold change of 
         PAS(polyadenylation signal) usage index}
-    \item{BPPARAM}{An optional \code{\link[BiocParallel]{BiocParallelParam}} 
+    \item{BPPARAM}{An optional \code{\link[BiocParallel:BiocParallelParam-class]{BiocParallelParam}} 
         instance determining the parallel back-end to be used during 
         evaluation, or a list of BiocParallelParam instances, to be applied 
         in sequence for nested calls to bplapply.}

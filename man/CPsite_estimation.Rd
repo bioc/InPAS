@@ -70,7 +70,7 @@ tmpfolder=NULL, silence=TRUE)
     output of \link{depthWeight}
 }
   \item{genome}{
-    a \link[BSgenome]{BSgenome} object
+    a \link[BSgenome:BSgenome-class]{BSgenome} object
 }
   \item{step}{
     adjust step, default 1, means adjust by each base by cleanUpdTSeq.

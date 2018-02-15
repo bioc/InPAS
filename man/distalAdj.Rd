@@ -24,7 +24,7 @@ distalAdj(distalCPs, classifier, classifier_cutoff, shift_range, genome, step=1)
     the searching range for the better CP sites
 }
   \item{genome}{
-    a \link[BSgenome]{BSgenome} object
+    a \link[BSgenome:BSgenome-class]{BSgenome} object
 }
   \item{step}{
     adjust step, default 1, means adjust by each base by cleanUpdTSeq.

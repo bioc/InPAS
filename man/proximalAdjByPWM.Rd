@@ -29,7 +29,7 @@ proximalAdjByPWM(idx, PolyA_PWM, seqnames, starts, strands, genome,
     strands
 }
   \item{genome}{
-    an \link[BSgenome]{BSgenome} object
+    an \link[BSgenome:BSgenome-class]{BSgenome} object
 }
   \item{shift_range}{
     the shift range of PWM hits

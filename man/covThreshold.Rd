@@ -16,10 +16,10 @@ covThreshold(coverage, genome, txdb, utr3,
         output of \link{coverageFromBedGraph}
 }
   \item{genome}{
-    an object of \link[BSgenome]{BSgenome}
+    an object of \link[BSgenome:BSgenome-class]{BSgenome}
 }
   \item{txdb}{
-    an object of \link[GenomicFeatures]{TxDb}
+    an object of \link[GenomicFeatures:TxDb-class]{TxDb}
 }
   \item{utr3}{
     output of \link{utr3Annotation}

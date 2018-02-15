@@ -11,7 +11,7 @@ seqLen(genome)
 }
 \arguments{
   \item{genome}{
-    an object of \link[BSgenome]{BSgenome}
+    an object of \link[BSgenome:BSgenome-class]{BSgenome}
 }
 }
 \value{
@@ -21,6 +21,6 @@ seqLen(genome)
     Jianhong Ou
 }
 \seealso{
-    \code{\link[GenomeInfoDb]{seqlengths}}
+    \code{\link[GenomeInfoDb:Seqinfo-class]{seqlengths}}
 }
 \keyword{ misc }

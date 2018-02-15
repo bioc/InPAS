@@ -17,7 +17,7 @@
 \arguments{
     \item{coverage}{coverage for each sample, 
         output of \link{coverageFromBedGraph}}
-    \item{txdb}{an object of \link[GenomicFeatures]{TxDb}}
+    \item{txdb}{an object of \link[GenomicFeatures:TxDb-class]{TxDb}}
     \item{genome}{an object of BSgenome}
     \item{cutoff_readsNum}{cutoff reads number. If the coverage in the location 
     is greater than cutoff_readsNum, the location will be treated as coveraged 
@@ -38,7 +38,7 @@
         mean(c(0.05, 0.12, 0.07, 0.17) > cutoff_expdGene_cvgRate) <= cutoff_expdGene_sampleRate
     }
     \item{which}{
-        an object of \link[GenomicRanges]{GRanges} or NULL. If it is not NULL,
+        an object of \link[GenomicRanges:GRanges-class]{GRanges} or NULL. If it is not NULL,
         only the exons overlapping the given ranges are used.
     }
     \item{...}{not used.}

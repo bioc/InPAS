@@ -14,7 +14,7 @@
     \item{gr}{an object of GRanges}
     \item{coverage}{coverage for each sample}
     \item{proximalSites}{proximal sites}
-    \item{genome}{an object of \link[BSgenome]{BSgenome}}
+    \item{genome}{an object of \link[BSgenome:BSgenome-class]{BSgenome}}
     \item{groupList}{the list of sample names}
 }
 \value{

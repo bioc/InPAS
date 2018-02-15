@@ -29,7 +29,7 @@ proximalAdjByCleanUpdTSeq(idx.list, cov_diff.list, seqnames, starts, strands,
     strands
 }
   \item{genome}{
-    a \link[BSgenome]{BSgenome} object
+    a \link[BSgenome:BSgenome-class]{BSgenome} object
 }
   \item{classifier}{
     cleanUpdTSeq classifier

@@ -23,7 +23,7 @@
     \item{coverage}{coverage for each sample, 
         output of \link{coverageFromBedGraph}}
     \item{groupList}{group list of tag names}
-    \item{genome}{an object of \link[BSgenome]{BSgenome}}
+    \item{genome}{an object of \link[BSgenome:BSgenome-class]{BSgenome}}
     \item{utr3}{output of \link{utr3Annotation}}
     \item{window_size}{window size for noval distal position searching and 
         adjusted polyA searching, default: 100}
@@ -34,7 +34,7 @@
     \item{cutEnd}{how many nucleotides should be removed  from the end before 
         search, 0.1 means 10 percent.}
     \item{adjust_distal_polyA_end}{If true, adjust distal polyA end by 
-        \link[cleanUpdTSeq]{cleanUpdTSeq}}
+        \link[cleanUpdTSeq:cleanUpdTSeq-package]{cleanUpdTSeq}}
     \item{coverage_threshold}{cutoff coverage threshold for first 100 
         nucleotides. If the coverage of first 100 nucleotides is lower than 
         coverage_threshold, that transcript will be dropped.}
@@ -42,10 +42,10 @@
         of long form. If the coverage in the region of long form is less than 
         long_coverage_threshold, that transcript will be dropped.}
     \item{background}{the range for calculating cutoff threshold of local background}
-    \item{txdb}{an object of \link[GenomicFeatures]{TxDb}}
+    \item{txdb}{an object of \link[GenomicFeatures:TxDb-class]{TxDb}}
     \item{PolyA_PWM}{Position Weight Matrix of polyA}
     \item{classifier}{An object of class 
-        \code{"\link[cleanUpdTSeq]{PASclassifier}"}}
+        \code{"\link[cleanUpdTSeq:PASclassifier-class]{PASclassifier}"}}
     \item{classifier_cutoff}{This is the cutoff used to assign whether a 
         putative pA is true or false. 
         This can be any floating point number between 0 and 1. For example,
@@ -55,7 +55,7 @@
     \item{step}{adjust step, default 1, means adjust by each base by cleanUpdTSeq.}
     \item{two_way}{Search the proximal site from both direction or not.}
     \item{shift_range}{the shift range for polyA site searching}
-    \item{BPPARAM}{An optional \code{\link[BiocParallel]{BiocParallelParam}} 
+    \item{BPPARAM}{An optional \code{\link[BiocParallel:BiocParallelParam-class]{BiocParallelParam}} 
         instance determining the parallel back-end to be used during 
         evaluation, or a list of BiocParallelParam instances, to be applied 
         in sequence for nested calls to bplapply.}

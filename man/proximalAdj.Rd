@@ -22,7 +22,7 @@ proximalAdj(CPs, MINSIZE, PolyA_PWM, genome, classifier, classifier_cutoff,
     PolyA position weight metrix
 }
   \item{genome}{
-    a \link[BSgenome]{BSgenome} object
+    a \link[BSgenome:BSgenome-class]{BSgenome} object
 }
   \item{classifier}{
     cleanUpdTSeq classifier

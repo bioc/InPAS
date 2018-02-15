@@ -14,7 +14,7 @@ getCov(bedgraph, genome, seqLen)
     bedGraph file names
 }
   \item{genome}{
-    an object \link[BSgenome]{BSgenome}
+    an object \link[BSgenome:BSgenome-class]{BSgenome}
 }
   \item{seqLen}{
     lengthes of each chromosome

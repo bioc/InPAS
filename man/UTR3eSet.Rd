@@ -17,7 +17,7 @@
 }
 \section{Slots}{
   \describe{
-    \item{\code{usage}}{an \link[GenomicRanges]{GRanges} object with CP sites info.}
+    \item{\code{usage}}{an \link[GenomicRanges:GRanges-class]{GRanges} object with CP sites info.}
     
     \item{\code{PDUI}}{a matrix of PDUI}
     
@@ -35,8 +35,8 @@
 \section{Methods}{
   \describe{
     \item{$, $<-}{Get or set the slot of \link{UTR3eSet}}
-    \item{as("UTR3eSet", "ExpressionSet")}{Convert a UTR3eSet to an \link[Biobase]{ExpressionSet}.}
-    \item{as("UTR3eSet", "GRanges")}{Convert a UTR3eSet to an \link[GenomicRanges]{GRanges}.}
+    \item{as("UTR3eSet", "ExpressionSet")}{Convert a UTR3eSet to an \link[Biobase:ExpressionSet-class]{ExpressionSet}.}
+    \item{as("UTR3eSet", "GRanges")}{Convert a UTR3eSet to an \link[GenomicRanges:GRanges-class]{GRanges}.}
   }
 }
 \author{

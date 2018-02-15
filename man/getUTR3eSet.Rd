@@ -22,7 +22,7 @@ getUTR3eSet(CPsites, coverage, genome, utr3,
         \link{coverageFromBedGraph}
 }
   \item{genome}{
-    an object of \link[BSgenome]{BSgenome}
+    an object of \link[BSgenome:BSgenome-class]{BSgenome}
 }
   \item{utr3}{
     output of \link{utr3Annotation}
@@ -34,7 +34,7 @@ getUTR3eSet(CPsites, coverage, genome, utr3,
     parameter can be passed into \link[preprocessCore]{normalize.quantiles.robust}
 }
   \item{BPPARAM}{
-    An optional \code{\link[BiocParallel]{BiocParallelParam}} 
+    An optional \code{\link[BiocParallel:BiocParallelParam-class]{BiocParallelParam}} 
         instance determining the parallel back-end to be used during 
         evaluation, or a list of BiocParallelParam instances, to be applied 
         in sequence for nested calls to bplapply.

@@ -15,7 +15,7 @@ totalCoverage(coverage, genome, hugeData, groupList=NULL)
         \link{coverageFromBedGraph}
 }
   \item{genome}{
-    an object of \link[BSgenome]{BSgenome}
+    an object of \link[BSgenome:BSgenome-class]{BSgenome}
 }
   \item{hugeData}{
     hugeData or not

@@ -20,7 +20,7 @@ lastCDSusage(CDS, coverage, hugeData, BPPARAM=NULL, phmm=FALSE)
     is it a huge dataset?
 }
   \item{BPPARAM}{
-    An optional \code{\link[BiocParallel]{BiocParallelParam}} 
+    An optional \code{\link[BiocParallel:BiocParallelParam-class]{BiocParallelParam}} 
         instance determining the parallel back-end to be used during 
         evaluation, or a list of BiocParallelParam instances, to be applied 
         in sequence for nested calls to bplapply.
