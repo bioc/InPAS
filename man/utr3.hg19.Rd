@@ -36,7 +36,7 @@
     
     library(org.Hs.eg.db)
         
-    utr3Annotation(TxDb.Hsapiens.UCSC.hg19.knownGene, org.Hs.egSYMBOL)
+    utr3Annotation(TxDb.Hsapiens.UCSC.hg19.knownGene, "org.Hs.egSYMBOL")
 }
 \value{
     an object of GRanges.

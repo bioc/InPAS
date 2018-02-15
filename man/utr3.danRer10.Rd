@@ -1,14 +1,14 @@
-\name{utr3.mm10}
-\alias{utr3.mm10}
+\name{utr3.danRer10}
+\alias{utr3.danRer10}
 \docType{data}
 \title{
-    3'UTR annotation for mm10 obtained from utr3Annotation
+    3'UTR annotation for danRer10 obtained from utr3Annotation
 }
 \description{
     3'UTR annotation obtained from utr3Annotation by 
-    TxDb.Mmusculus.UCSC.mm10.knownGene and org.Mm.eg.db
+    TxDb.Drerio.UCSC.danRer10.refGene and org.Dr.eg.db
 }
-\usage{data(utr3.mm10)}
+\usage{data(utr3.danRer10)}
 \format{
     GRanges with slot start holding the start position of the 3'UTR, slot end 
     holding the end position of the 3'UTR, slot names holding transcripts and 
@@ -32,18 +32,18 @@
 \details{
     used in the examples
     Annotation data obtained by:
-    library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+    library(TxDb.Drerio.UCSC.danRer10.refGene)
     
-    library(org.Mm.eg.db)
+    library(org.Dr.eg.db)
         
-    utr3Annotation(TxDb.Mmusculus.UCSC.mm10.knownGene, "org.Mm.egSYMBOL")
+    utr3Annotation(TxDb.Drerio.UCSC.danRer10.refGene, "org.Dr.egSYMBOL")
 }
 \value{
     an object of GRanges.
 }
 
 \examples{
-    data(utr3.mm10)
-    head(utr3.mm10)
+    data(utr3.danRer10)
+    head(utr3.danRer10)
 }
 \keyword{datasets}
