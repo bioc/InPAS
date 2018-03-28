@@ -35,7 +35,7 @@
 \section{Methods}{
   \describe{
     \item{$, $<-}{Get or set the slot of \link{UTR3eSet}}
-    \item{as("UTR3eSet", "ExpressionSet")}{Convert a UTR3eSet to an \link[Biobase:ExpressionSet-class]{ExpressionSet}.}
+    \item{as("UTR3eSet", "ExpressionSet")}{Convert a UTR3eSet to an \link[Biobase:class.ExpressionSet]{ExpressionSet}.}
     \item{as("UTR3eSet", "GRanges")}{Convert a UTR3eSet to an \link[GenomicRanges:GRanges-class]{GRanges}.}
   }
 }
