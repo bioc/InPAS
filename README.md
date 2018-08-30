@@ -12,8 +12,8 @@ Alternative polyadenylation (APA) is one of the important post-transcriptional r
 To install this package, start R and enter:
 
 ```r
-library(BiocInstaller)
-biocLite("InPAS")
+library(BiocManager)
+BiocManager::install("InPAS")
 ```
 
 ## Documentation
