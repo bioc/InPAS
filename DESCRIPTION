@@ -1,7 +1,7 @@
 Package: InPAS
 Type: Package
 Title: Identification of Novel alternative PolyAdenylation Sites (PAS)
-Version: 1.14.0
+Version: 1.14.1
 Authors@R: c(person("Jianhong Ou", "Developer", role = c("aut", "cre"),
         email = "jianhong.ou@umassmed.edu"), person("Lihua Julie Zhu",
         "Developer", role = "aut", email = "Julie.Zhu@umassmed.edu"))
@@ -14,7 +14,8 @@ Description: Alternative polyadenylation (APA) is one of the important
              APA sites from RNAseq data. It leverages cleanUpdTSeq to fine 
              tune identified APA sites.
 biocViews: RNASeq, Sequencing, AlternativeSplicing, Coverage,
-        DifferentialSplicing, GeneRegulation, Transcription
+        DifferentialSplicing, GeneRegulation, Transcription,
+        ImmunoOncology
 License: GPL (>= 2)
 Lazyload: yes
 Imports: AnnotationDbi, BSgenome, cleanUpdTSeq, Gviz, seqinr, preprocessCore, 
