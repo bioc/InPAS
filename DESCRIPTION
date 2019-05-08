@@ -1,11 +1,11 @@
 Package: InPAS
 Type: Package
 Title: Identification of Novel alternative PolyAdenylation Sites (PAS)
-Version: 1.17.0
+Version: 1.17.1
 Authors@R: c(person("Jianhong Ou", "Developer", role = c("aut", "cre"),
         email = "jianhong.ou@duke.edu"), person("Lihua Julie Zhu",
         "Developer", role = "aut", email = "Julie.Zhu@umassmed.edu"))
-Author: Jianhong Ou, Sung Mi Park, Michael R. Green and Lihua Julie Zhu
+Author: Jianhong Ou, Sungmi M. Park, Michael R. Green and Lihua Julie Zhu
 Maintainer: Jianhong Ou <jianhong.ou@duke.edu>, 
             Lihua Julie Zhu <Julie.Zhu@umassmed.edu>
 Description: Alternative polyadenylation (APA) is one of the important 
