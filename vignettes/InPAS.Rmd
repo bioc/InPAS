@@ -1,16 +1,16 @@
 ---
 title: "InPAS Vignette"
-author: "Jianhong Ou, Lihua Julie Zhu"
+author: "Jianhong Ou, Sungmi Park, Michael Green, Lihua Julie Zhu"
 date: "`r doc_date()`"
 package: "`r pkg_ver('InPAS')`"
 bibliography: ref.bib
 csl: nature.csl
 abstract: >
-   Alternative polyadenylation (APA) is one of the important 
-   post-transcriptional regulation mechanisms which occurs in 
-   most human genes. InPAS facilitates the discovery of novel 
-   APA sites from RNAseq data. It leverages cleanUpdTSeq[@sheppard2013accurate] to fine 
-   tune identified APA sites.
+   Alternative polyadenylation (APA) is one of the important post-transcriptional
+   regulation mechanisms which occurs in most human genes. InPAS facilitates the 
+   discovery of novel APA sites and the differential usage of APA sites from 
+   RNA-Seq data. It leverages cleanUpdTSeq[@sheppard2013accurate] to fine tune
+   identified APA sites by removing false sites due to internal-priming.
 vignette: >
   %\VignetteIndexEntry{InPAS Vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -30,27 +30,30 @@ suppressPackageStartupMessages({
 # Introduction
 
 Alternative polyadenylation (APA) is one of the most important 
-post-transcriptional regulation mechanisms which occurs in most human 
-genes. APA in a gene can result in altered expression of the gene, 
-which can lead pathological effect to the cells, such as uncontrolled cell 
-cycle and growth. However, there are only limited ways to identify 
-and quantify APA in genes, and most of them suffers from complicated 
-process for library construction and requires large amount of RNAs. 
+post-transcriptional regulation mechanisms which is prevalent in human 
+genes. Like alternative splicing, APA can create proteome diversity. 
+In addition, it defines 3' UTR and results in altered expression of the gene.
+It is a tightly controlled process and mis-regulation of APA can lead to 
+pathological effects to the cells, such as uncontrolled cell cycle and growth. 
+Although several high throughput sequencing methods have been developed, 
+there are still limited data available.
 
-RNA-seq has become one of the most commonly used methods for quantifying 
-genome-wide gene expression. There are massive RNA-seq datasets available 
-publicly such as GEO and TCGA. For this reason, we develop the InPAS 
-algorithm for identifying APA from conventional RNA-seq data.
+RNA-seq has become one of the most commonly used methods for quantifying
+genome-wide gene expression. There are massive RNA-seq datasets available
+in public databases such as GEO and TCGA. For this reason, we develop the 
+InPAS algorithm for identifying APA from conventional RNA-seq data.
 
 The workflow for InPAS is:
 
 - Calculate coverage from BEDGraph files
-- Predict cleavage sites
-- Estimate 3UTR usage
+- Identify putative pA sites based on the coverage changes 
+- Filter putative pA sites using cleanUpdTseq to remove false sites due to internal-priming.
+- Estimate alternative pA usage using the coverage for the predicted 3' UTR
+- Identify differential usage of APA in different samples leveraging Limma
 
 # How to
 
-To use InPAS, BSgenome and TxDb object have to be loaded before run.
+First, load the required libraries InPAS, species specific BSgenome, and TxDb as follows.
 
 ```{r loadLibrary}
 library(InPAS)
@@ -58,9 +61,10 @@ library(BSgenome.Mmusculus.UCSC.mm10)
 library(TxDb.Mmusculus.UCSC.mm10.knownGene)
 path <- file.path(find.package("InPAS"), "extdata")
 ```
-Users can prepare annotaiton by **utr3Annotation** with a TxDb and 
-org annotation. The 3UTR annotation prepared by **utr3Annotation** 
-includes the gaps to next annotation region.
+
+Next, prepare annotation using the function `utr3Annotation` with a TxDb and org annotation.
+Please note that the 3' UTR annotation prepared by `utr3Annotation` 
+includes the gaps to the next annotated region.
 
 ```{r prepareAnno}
 library(org.Hs.eg.db)
@@ -72,8 +76,8 @@ utr3.sample.anno <- utr3Annotation(txdb=txdb,
 utr3.sample.anno
 ```
 
-Users can load mm10 and hg19 annotation from pre-prepared data. 
-Here we loaded the prepared mm10 3UTR annotation file.
+Users can also directly load the 3' UTR annotation included in this package 
+for mm10 and hg19. Here we show how to load the pre-built mm10 3' UTR annotation file.
 
 ```{r loadAnno}
 ##step1 annotation
@@ -81,10 +85,12 @@ Here we loaded the prepared mm10 3UTR annotation file.
 data(utr3.mm10)
 ```
 
-The coverage is calculated from BEDGraph file. The RNA-seq BAM files 
-could be converted to BEDGraph files by bedtools genomecov tool 
-(parameter: -bg -split). PWM and a classifier of polyA signal can be 
-used for adjusting CP sites prediction. 
+For coverage calculation, alignment files in BEDGraph format are required, 
+which can be generated from BAM files using the genomecov tool in bedtools
+with parameter: -bg -split. Potential pA sites identified from the coverage
+data can be filtered/adjusted using the classifier provided by _cleanUpdTseq_. 
+The following scripts illustrate the function calls needed to perform the 
+complete analysis using _InPAS_.
 
 ```{r step2HugeDataF}
 load(file.path(path, "polyA.rds"))
@@ -138,7 +144,7 @@ filterRes(res, gp1="Baf3", gp2="UM15",
           PDUI_logFC_cutoff=0.59)
 ```
 
-The process described above can be done in one step.
+The steps described above can be done in one function call.
 
 ```{r OneStep}
 if(interactive()){
@@ -160,7 +166,7 @@ if(interactive()){
 }
 ```
 
-InPAS can handle single group data.
+InPAS can also handle single group data.
 
 ```{r SingleGroupData}
 inPAS(bedgraphs=bedgraphs[1], tags=c("Baf3"), 
