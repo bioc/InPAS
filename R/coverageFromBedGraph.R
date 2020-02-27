@@ -3,14 +3,14 @@ coverageFromBedGraph <- function(bedgraphs, tags,
                                  BPPARAM=NULL, ...){
     if(missing(genome))
         stop("genome is required.")
-    if(class(genome)!="BSgenome")
+    if(!is(genome, "BSgenome"))
         stop("genome must be an object of BSgenome.")
     if(missing(tags) || missing(bedgraphs))
         stop("tags and bedgraphs are required.")
     if(length(tags)!=length(bedgraphs)){
         stop("length of tags and bedgraphs should be identical")
     }
-    if(class(tags)!="character")
+    if(!is.character(tags))
         stop("tags must be a character vector")
     if(any(duplicated(tags)))
         stop("There are duplicated tags")

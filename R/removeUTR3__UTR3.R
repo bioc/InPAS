@@ -12,7 +12,7 @@ removeUTR3__UTR3 <- function(x){
             if(id<3) id <- 3
             pval <- try(t.test(y[1:(id-2)], y[-(1:(id+2))])$p.value, 
                         silent=TRUE)
-            if(class(pval)=="numeric" && length(pval)==1 && !is.na(pval)){
+            if(is.numeric(pval) && length(pval)==1 && !is.na(pval)){
                 if(pval < 0.001){
                     x <- x[1:((id-1)*ws)]
                 }

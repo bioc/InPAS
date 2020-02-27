@@ -7,9 +7,9 @@ CPsite_estimation <- function(chr.cov, utr3, MINSIZE, window_size,
                               shift_range, depth.weight, genome, step=1,
                               two_way=FALSE,
                               tmpfolder=NULL, silence=TRUE){
-    if(class(chr.cov)=="character"){
+    if(is.character(chr.cov)){
         chr.cov <- readRDS(file = chr.cov)
-        if(class(chr.cov)!="list"){
+        if(!is.list(chr.cov)){
             stop("Something wrong when load big data. ", 
                  "Maybe the tempfile is broken!")
         }
@@ -109,7 +109,7 @@ CPsite_estimation <- function(chr.cov, utr3, MINSIZE, window_size,
         
         ##step2 adjust distal cp sites
         if(!silence) message("chromsome", seqn, "distal adjust ... start")
-        if(adjust_distal_polyA_end && class(classifier)=="PASclassifier"){
+        if(adjust_distal_polyA_end && is(classifier, "PASclassifier")){
             if(CPsite_search_step < 2){
                 CPsite_search_step <- 2
                 chr.abun <- distalAdj(chr.abun, classifier, classifier_cutoff,
@@ -140,7 +140,7 @@ CPsite_estimation <- function(chr.cov, utr3, MINSIZE, window_size,
         
         ##step4 adjust proximal cp sites
         if(!silence) message("chromsome", seqn, "proximal adjust ... start")
-        if(class(PolyA_PWM)=="matrix" || class(classifier)=="PASclassifier"){
+        if(is(PolyA_PWM, "matrix") || is(classifier, "PASclassifier")){
             if(CPsite_search_step < 4){
                 CPsite_search_step <- 4
                 chr.abun <- proximalAdj(chr.abun, MINSIZE, PolyA_PWM, 

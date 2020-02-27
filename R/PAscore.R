@@ -11,7 +11,7 @@ PAscore <- function(seqname, pos, str, idx, PWM, genome, ups=50, dws=50){
     seq <- getSeq(genome, gr)
     mT <- lapply(seq, matchPWM, pwm=PWM, min.score="70%", with.score=TRUE)
     hits <- sapply(mT, function(.ele) {
-        if(class(.ele)!="XStringViews") return(FALSE)
+        if(!is(.ele, "XStringViews")) return(FALSE)
         if(length(.ele)==0) return(FALSE)
         TRUE
     })

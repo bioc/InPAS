@@ -49,16 +49,16 @@ inPAS <- function(bedgraphs, genome, utr3, txdb=NA,
         if(background!="same_as_long_coverage_threshold") {
             stop("txdb is missing when you want local background")
         }else{
-            if(class(txdb)!="TxDb")
+            if(!is(txdb, "TxDb"))
                 stop("txdb must be an object of TxDb")
         }
     }
     
     if(missing(genome) || missing(utr3))
         stop("genome and utr3 are required.")
-    if(class(genome)!="BSgenome")
+    if(!is(genome, "BSgenome"))
         stop("genome must be an object of BSgenome.")
-    if(class(utr3)!="GRanges" | 
+    if(!is(utr3, "GRanges") | 
            !all(utr3$feature %in% c("utr3", "next.exon.gap", "CDS"))){
         stop("utr3 must be output of function of utr3Annotation")
     }

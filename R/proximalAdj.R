@@ -10,13 +10,13 @@ proximalAdj <- function(CPs, MINSIZE, PolyA_PWM,
     starts[strands=="-"] <- lapply(starts[strands=="-"], rev)
     starts <- sapply(starts, `[`, 1)
     idx.list <- CPs$Predicted_Proximal_APA
-    if(class(PolyA_PWM)=="matrix"){
+    if(is(PolyA_PWM, "matrix")){
         idx.list <- proximalAdjByPWM(idx.list, PolyA_PWM, seqnames, starts,
                                      strands, genome, shift_range, 
                                      search_point_START)
     }
     cov_diff.list <- CPs$fit_value
-    if(class(classifier)=="PASclassifier"){
+    if(is(classifier, "PASclassifier")){
         idx.list <- proximalAdjByCleanUpdTSeq(idx.list, cov_diff.list, 
                                               seqnames, starts, strands, 
                                               genome, 

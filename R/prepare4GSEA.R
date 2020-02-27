@@ -4,7 +4,7 @@ prepare4GSEA <- function(eset, groupList, Preranked=TRUE,
                          chipFilename="InPAS.chip", 
                          dataFilename="dPDUI.txt",
                          PhenFilename="group.cls"){
-    if(class(eset)!="UTR3eSet"){
+    if(!is(eset, "UTR3eSet")){
         stop("eset must be an object of UTR3eSet")
     }
     if(Preranked){

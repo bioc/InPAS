@@ -10,7 +10,7 @@ getCov <- function(bedgraph, genome, seqLen){
         ## convert to seqStyle
         levels <- 
             mapSeqlevels(levels(seqnames.bedfile), seqStyle)
-        if(class(levels)!="character"){
+        if(!is.character(levels)){
             id <- apply(levels, 1, function(.ele) 
                 sum(seqnames %in% .ele))
             levels <- levels[id==max(id),][1, ]

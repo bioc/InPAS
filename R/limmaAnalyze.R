@@ -2,13 +2,13 @@ limmaAnalyze <- function(UTR3eset, design, contrast.matrix, coef=1, robust=FALSE
     if(missing(design)||missing(contrast.matrix)){
         stop("desing and contrast.matrix is required.")
     }
-    if(class(design)!="matrix"){
+    if(!is(design, "matrix")){
         stop("design must be an design matrix")
     }
-    if(class(contrast.matrix)!="matrix"){
+    if(!is(contrast.matrix, "matrix")){
         stop("contrast.matrix must be an object of matrix")
     }
-    if(class(UTR3eset)!="UTR3eSet"){
+    if(!is(UTR3eset, "UTR3eSet")){
         stop("UTR3eset must be an object of UTR3eSet")
     }
     short <- UTR3eset@short

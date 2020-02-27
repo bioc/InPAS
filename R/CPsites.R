@@ -15,15 +15,15 @@ CPsites <- function(coverage, groupList=NULL, genome, utr3, window_size=100,
     FFT=FALSE
     fft.sm.power=20
     if(!is.na(PolyA_PWM)[1]){
-        if(class(PolyA_PWM)!="matrix") stop("PolyA_PWM must be matrix")
+        if(!is(PolyA_PWM, "matrix")) stop("PolyA_PWM must be matrix")
         if(any(rownames(PolyA_PWM)!=c("A", "C", "G", "T"))) 
             stop("rownames of PolyA_PWM must be c(\"A\", \"C\", \"G\", \"T\")")
     }
     if(missing(coverage) || missing(genome) || missing(utr3))
         stop("coverage, genome and utr3 are required.")
-    if(class(genome)!="BSgenome")
+    if(!is(genome, "BSgenome"))
         stop("genome must be an object of BSgenome.")
-    if(class(utr3)!="GRanges" | 
+    if(!is(utr3, "GRanges") | 
            !all(utr3$feature %in% c("utr3", "next.exon.gap", "CDS"))){
         stop("utr3 must be output of function of utr3Annotation")
     }
@@ -34,7 +34,7 @@ CPsites <- function(coverage, groupList=NULL, genome, utr3, window_size=100,
     background <- match.arg(background)
     introns <- GRanges()
     if(background!="same_as_long_coverage_threshold"){
-        if(class(txdb)!="TxDb") 
+        if(!is(txdb, "TxDb")) 
             stop("txdb is missing when you want local background")
         if(!identical(unname(genome(txdb))[1], unname(genome(utr3))[1])) 
             stop("genome of txdb should be same as genome of utr3")
@@ -50,7 +50,7 @@ CPsites <- function(coverage, groupList=NULL, genome, utr3, window_size=100,
     if(!silence) message("total backgroud ... done.")
     utr3 <- utr3[utr3$feature!="CDS"]
     MINSIZE <- 10
-    hugeData <- class(coverage[[1]])=="character"
+    hugeData <- is.character(coverage[[1]])
     if(hugeData && !is.null(names(groupList))[1]){
         cov.load <- FALSE
         if(!is.null(tmpfolder)){

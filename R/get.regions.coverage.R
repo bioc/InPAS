@@ -13,7 +13,7 @@ get.regions.coverage <- function(chr, utr3.regions.chr,
             if(maxEnd>length(.ele)){
                 .ele <- append(.ele, rep(0, maxEnd - length(.ele) + 1))
             }
-            if(class(.ele)=="Rle"){
+            if(is(.ele, "Rle")){
                 .cvg <- Views(.ele, start(view), end(view))
                 if(phmm) all.tx[[names(coverage)[i]]] <- 
                     viewApply(.cvg, as.integer)

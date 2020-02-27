@@ -1,5 +1,5 @@
 intronRegion <- function(txdb){
-    if(class(txdb)!="TxDb") stop("txdb must be an object of TxDb")
+    if(!is(txdb, "TxDb")) stop("txdb must be an object of TxDb")
     exons <- ranges(GeneRegionTrack(txdb))
     exons <- reduce(exons)
     genes <- genes(txdb)

@@ -3,12 +3,12 @@ coverageRate <- function(coverage, txdb, genome,
                          cutoff_expdGene_cvgRate=0.1,
                          cutoff_expdGene_sampleRate=0.5,
                          which=NULL, ...){
-    stopifnot(class(txdb)=="TxDb")
-    hugeData <- class(coverage[[1]])=="character"
-    stopifnot(class(genome)=="BSgenome")
+    stopifnot(is(txdb, "TxDb"))
+    hugeData <- is.character(coverage[[1]])
+    stopifnot(is(genome, "BSgenome"))
     seqnames <- trimSeqnames(genome)
     if(length(which)>0){
-        stopifnot(class(which)=="GRanges")
+        stopifnot(is(which,"GRanges"))
         message("strand information will be ignored.")
         seqnames <- seqnames[seqnames %in% unique(as.character(seqnames(which)))]
     }
@@ -38,7 +38,7 @@ coverageRate <- function(coverage, txdb, genome,
     
     ## reduce exon for each gene
     reduce_by_gene <- function(gr){
-        stopifnot(class(gr)=="GRanges")
+        stopifnot(is(gr, "GRanges"))
         stopifnot(!is.null(gr$gene_id))
         seqn <- cbind(as.character(seqnames(gr)), gr$gene_id)
         seqn <- unique(seqn)

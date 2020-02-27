@@ -47,7 +47,7 @@ UTR3TotalCoverage <- function(utr3, totalCov,
         view <- sapply(view, function(.view){
             viewApply(.view, as.integer)
         })
-        if(class(view[1,])=="list"){
+        if(is.list(view[1,])){
             view <- apply(view, 1, function(.ele) do.call(cbind, .ele))
         }else{
             view <- list(view)

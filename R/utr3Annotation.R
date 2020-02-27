@@ -1,5 +1,5 @@
 utr3Annotation <- function(txdb, orgDbSYMBOL, MAX_EXONS_GAP=10000){
-    if(class(txdb)!="TxDb") stop("txdb must be an object of TxDb")
+    if(!is(txdb, "TxDb")) stop("txdb must be an object of TxDb")
     if(!grepl("^org.*egSYMBOL$", orgDbSYMBOL)) 
         stop("orgDbSYMBOL must be a string 
              start with org and end with egSYMBOL.")

@@ -8,14 +8,14 @@ getUTR3eSet <- function(CPsites, coverage, genome, utr3,
     if(missing(utr3) || missing(genome)){
         stop("utr3 and genome is required.")
     }
-    if(class(genome)!="BSgenome")
+    if(!is(genome, "BSgenome"))
         stop("genome must be an object of BSgenome.")
-    if(class(utr3)!="GRanges" | 
+    if(!is(utr3, "GRanges") | 
            !all(utr3$feature %in% c("utr3", "next.exon.gap", "CDS"))){
         stop("utr3 must be output of function of utr3Annotation")
     }
     normalize <- match.arg(normalize)
-    hugeData <- class(coverage[[1]])=="character"
+    hugeData <- is.character(coverage[[1]])
     if((!singleSample) && length(coverage)==1){
         message("Single sample mode is on")
         singleSample <- TRUE
