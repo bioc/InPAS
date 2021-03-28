@@ -1,3 +1,19 @@
+#' adjust distal CP sites by cleanUpdTSeq
+#' 
+#' adjust distal CP sites by cleanUpdTSeq
+#' 
+#' @param distalCPs the output of [searchDistalCPs()]
+#' @param classifier cleanUpdTSeq classifier
+#' @param classifier_cutoff cutoff value of the classifier
+#' @param shift_range the searching range for the better CP sites
+#' @param genome a [BSgenome::BSgenome-class] object
+#' @param step adjust step, default 1, means adjust by each base 
+#'  by cleanUpdTSeq.
+#' @seealso [searchProximalCPs()], [PAscore2()]
+#' @keywords internal
+#'
+
+
 distalAdj <- function(distalCPs, classifier, classifier_cutoff,
                       shift_range, genome, step=1){
     dCPs <- distalCPs$dCPs
@@ -18,6 +34,7 @@ distalAdj <- function(distalCPs, classifier, classifier_cutoff,
     }, next.exon.gap, dCPs$distalCP, 
     1:length(next.exon.gap), dCPs$strand,
     SIMPLIFY=FALSE)
+    
     gap.cov <- do.call(rbind, gap.cov)
     if(length(gap.cov)>0){
         idx <- PAscore2(dCPs$seqnames[gap.cov[, "ID"]],

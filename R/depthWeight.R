@@ -1,10 +1,25 @@
+#' calculate the depth weight for each example
+#' 
+#' calculate the depth weight for each example: depth/mean(depth)
+#' 
+#' @param coverage a list. output of [coverageFromBedGraph()]
+#' @param hugeData is it a huge dataset?
+#' @param groupList group list for huge dataset
+#'
+#' @return  a numeric vector with depth weight
+#' @import S4Vectors
+#' @keywords internal
+#'
+
+
 depthWeight <- function(coverage, hugeData, groupList=NULL){
     n <- names(coverage)
     if(hugeData){
         depth <- numeric(length(coverage))
         for(i in 1:length(coverage)){
             cvg <- NULL
-            load(coverage[[i]])
+            load(coverage[[i]]) ## load coverage rds
+            
             d <- sapply(cvg, function(.cvg) {
                 sum(as.double(runValue(.cvg)) * runLength(.cvg))
             })
@@ -17,14 +32,16 @@ depthWeight <- function(coverage, hugeData, groupList=NULL){
             names(groups) <- unlist(groupList)
             groups <- groups[match(names(depth), names(groups))]
             if(any(is.na(groups))){
-                stop("all the tags in groupList must has correct names as it in coverage")
+                stop("all the tags in groupList must have correct names as it in coverage")
             }
             depth <- split(depth, groups)
+            
+            ## group mean depth
             depth <- sapply(depth, mean)
             n <- names(depth)
         }
         
-    }else{
+    } else {  ## not hugeData
         depth <- sapply(coverage, function(cvg){
             d <- sapply(cvg, function(.cvg) {
                 sum(as.double(runValue(.cvg)) * runLength(.cvg))

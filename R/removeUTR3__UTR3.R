@@ -1,4 +1,14 @@
 ##remove utr3---___---utr3, need to improve.
+#' remove the candidates LIKE UTR3___UTR3
+#' 
+#' some of the results is from connected two UTR3. We want to 
+#' remove them. However, the algorithm need to be improved.
+#'
+#' @param x the distal 3UTR coverage
+#'
+#' @return the 3UTR coverage after removing the next 3UTR
+#' @keywords internal
+#'
 removeUTR3__UTR3 <- function(x){
     ## smooth by window_size=10
     ws <- 10

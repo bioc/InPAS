@@ -1,3 +1,16 @@
+#' do analysis for single group samples
+#' 
+#' do analysis for single group samples by anova test
+#'
+#' @param UTR3eset output from [getUTR3eSet()]
+#' @return a matrix of test results
+#' @import limma
+#' @export
+#'
+#' @examples
+#' path <- file.path(find.package("InPAS"), "extdata")
+#' load(file.path(path, "eset.MAQC.rda"))
+#' res <- singleGroupAnalyze(eset)
 singleGroupAnalyze <- function(UTR3eset){
     data.long <- UTR3eset$long
     data.short <- UTR3eset$short

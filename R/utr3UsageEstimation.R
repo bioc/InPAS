@@ -1,5 +1,22 @@
-coverageCDS <- function(coverage, CDS, genome, gp1, gp2, hugeData){
-    totalCov <- totalCoverage(coverage, genome, hugeData, groupList=list(gp1=gp1, gp2=gp2))
+#' calculate the coverage for the last CDSs
+#' 
+#' calculate the coverage for the last CDSs
+#' 
+#' @param coverage coverage for each sample, outputs of [coverageFromBedGraph()] 
+#' @param CDS a object of [GenomicRanges::GRanges-class] for last CDSs
+#' @param genome an object of [BSgenome::BSgenome-class]
+#' @param gp1 tag names involved in group 1
+#' @param gp2 tag names involved in group 2
+#' @param hugeData logical(1), indicating whether the data is huge?
+#'
+#' @return a data frame containing CDS total coverage
+#' @export
+#'
+
+coverageCDS <- function(coverage, CDS, genome,
+                        gp1, gp2, hugeData){
+    totalCov <- totalCoverage(coverage, genome, 
+                              hugeData, groupList=list(gp1=gp1, gp2=gp2))
     cdsTotalCov <- UTR3TotalCoverage(CDS, totalCov)
     cdsTotalCov <- lapply(cdsTotalCov, function(.ele){
         lapply(.ele, function(.e){
@@ -17,7 +34,55 @@ coverageCDS <- function(coverage, CDS, genome, gp1, gp2, hugeData){
     cdsTotalCov
 }
 
-utr3UsageEstimation <- function(CPsites, coverage, genome, utr3, 
+#' Calculate 3'UTR usage for each region
+#' 
+#' Calculate 3'UTR usage for short form and long form
+#'
+#' @param CPsites outputs of [CPsites()]
+#' @param coverage coverage for each sample, output from [coverageFromBedGraph()]
+#' @param genome an object of [BSgenome::BSgenome-class]
+#' @param utr3 output of [utr3Annotation()]
+#' @param gp1 tag names involved in group 1
+#' @param gp2 tag names involved in group 2
+#' @param short_coverage_threshold cutoff threshold for coverage 
+#' in the region of short form
+#' @param long_coverage_threshold cutoff threshold for coverage 
+#' in the region of long form
+#' @param adjusted.P_val.cutoff cutoff value for adjusted p.value
+#' @param dPDUI_cutoff cutoff value for differential PAS (polyadenylation
+#' signal) usage index
+#' @param PDUI_logFC_cutoff cutoff value for log2 fold change of 
+#' PAS(polyadenylation signal) usage index
+#' @param BPPARAM An optional [BiocParallel::BiocParallelParam-class()] 
+#' instance determining the parallel back-end to be used during 
+#' evaluation, or a list of BiocParallelParam instances, 
+#' to be applied in sequence for nested calls to bplapply
+#'
+#' @return an object of [GenomicRanges::GRanges-class]
+#' @import limma GenomicRanges
+#' @export
+#' 
+#'
+#' @examples
+#' if(interactive()){
+#' library(BSgenome.Mmusculus.UCSC.mm10)
+#' path <- file.path(find.package("InPAS"), "extdata")
+#' bedgraphs <- file.path(path, "Baf3.extract.bedgraph")
+#' data(utr3.mm10)
+#' tags <- "Baf3"
+#' genome <- BSgenome.Mmusculus.UCSC.mm10
+#' coverage <- 
+#'     coverageFromBedGraph(bedgraphs, tags, genome, hugeData=FALSE)
+#' CP <- CPsites(coverage=coverage, gp1=tags, gp2=NULL, 
+#'              genome=genome, 
+#'              utr3=utr3.mm10, coverage_threshold=5, 
+#'              long_coverage_threshold=5)
+#' res <- utr3UsageEstimation(CP, coverage, 
+#'                            utr3.mm10, genome, gp1=tags, gp2=NULL)
+#' }
+
+utr3UsageEstimation <- function(CPsites, coverage, 
+                                genome, utr3, 
                                 gp1, gp2=NULL, 
                                 short_coverage_threshold=10, 
                                 long_coverage_threshold=2, 

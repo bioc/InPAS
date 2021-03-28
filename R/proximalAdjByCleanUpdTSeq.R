@@ -1,3 +1,28 @@
+#' adjust the proximal CP sites by cleanUpdTSeq
+#' 
+#' adjust the proximal CP sites by cleanUpdTSeq
+#'
+#' @param idx.list the offset of positions of CP sites
+#' @param cov_diff.list  the SSE values
+#' @param seqnames sequence names
+#' @param starts starts
+#' @param strands strands
+#' @param genome a [BSgenome::BSgenome-class] object
+#' @param classifier cleanUpdTSeq classifier
+#' @param classifier_cutoff  cutoff value of the classifier
+#' @param shift_range the searching range for the better CP sites
+#' @param search_point_START just in case there is no better CP sites
+#' @param step adjust step, default 1, means adjust by each base 
+#' by cleanUpdTSeq.
+#'
+#' @return the offset of positions of CP sites after filter
+#' @details the step for calculating is 10, can not do every base
+#'  base it is really very slow.
+#' @keywords internal
+#' 
+#' @seealso [proximalAdjByPWM()], [PAscore2()]
+#'
+
 proximalAdjByCleanUpdTSeq <- function(idx.list, cov_diff.list, 
                                       seqnames, starts, strands, 
                                       genome, classifier, classifier_cutoff,

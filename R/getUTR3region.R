@@ -1,3 +1,13 @@
+#' extract long and short 3UTR region
+#' 
+#' extract long and short 3UTR region
+#'
+#' @param .grs output of [CPsites()]
+#'
+#' @return A [GenomicRanges::GRanges-class] object with short form and long 3' UTR forms
+#' @keywords internal
+#' @import GenomicRanges IRanges
+
 getUTR3region <- function(.grs){
     .ra <- c(ranges(.grs), 
              IRanges(min(.grs$Predicted_Proximal_APA[1], 

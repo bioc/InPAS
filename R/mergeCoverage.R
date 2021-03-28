@@ -1,6 +1,26 @@
-mergeCoverage <- function(coverage, groupList, genome, BPPARAM=NULL){
-    seqnames <- trimSeqnames(genome)
-    seqLen <- seqLen(genome)
+#' Title
+#'
+#' @param coverage coverage for each sample, output of [coverageFromBedGraph()]
+#' @param groupList group list of tag names
+#' @param genome an object of [BSgenome::BSgenome-class]
+#' @param removeScaffolds logical(1), whether the scaffolds should be 
+#' removed from the genome
+#' @param BPPARAM an optional [BiocParallel::BiocParallelParam-class] 
+#' instance determining the parallel back-end to be used during evaluation, 
+#' or a list of BiocParallelParam instances, to be applied in sequence for
+#' nested calls to bplapply
+#'
+#' @return
+#' @import BiocParallel
+#' @keywords internal
+#'
+#' @examples
+#' 
+mergeCoverage <- function(coverage, groupList, 
+                          genome, removeScaffolds = FALSE, BPPARAM=NULL)
+{
+    seqnames <- trimSeqnames(genome, removeScaffolds = removeScaffolds)
+    seqLen <- seqLen(genome, removeScaffolds = removeScaffolds)
     seqRle <- list()
     for(i in 1:length(seqnames)){
         seqRle[[seqnames[i]]] <- Rle(0, seqLen[i])

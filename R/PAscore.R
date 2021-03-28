@@ -1,3 +1,22 @@
+#' calculate the CP score
+#' 
+#' calculate the CP score by PWM
+#'
+#' @param seqname sequence names
+#' @param pos genomic positions
+#' @param str strands
+#' @param idx offset position
+#' @param PWM polyA position weight matrix
+#' @param genome an object of [BSgenome::BSgenome-class]
+#' @param ups upstream base
+#' @param dws downstream base
+#'
+#' @return A list containing offset positions after filtering
+#' @import GenomicRanges BSgenome IRanges
+#' @seealso [PAscore2()]
+#' @keywords internal
+#'
+
 PAscore <- function(seqname, pos, str, idx, PWM, genome, ups=50, dws=50){
     pos <- pos[!is.na(pos)]
     if(length(pos)<1){

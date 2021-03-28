@@ -1,3 +1,23 @@
+#' calculate the CP score
+#' 
+#' calculate CP score by cleanUpdTSeq
+#'
+#' @param seqname sequence names
+#' @param pos genomic positions
+#' @param str strands
+#' @param idx offset position
+#' @param idx.gp group number of the offset position
+#' @param genome an object of [BSgenome::BSgenome-class]
+#' @param classifier a cleanUpdTSeq classifier
+#' @param classifier_cutoff classifier cutoff value
+#'
+#' @return a data frame
+#' @seealso [PAscore()]
+#' @importFrom cleanUpdTSeq buildFeatureVector predictTestSet
+#' @import GenomicRanges IRanges
+#' @keywords internal
+#'
+
 PAscore2 <- function(seqname, pos, str, idx, idx.gp,
                      genome, classifier, classifier_cutoff){
     if(length(pos)<1){

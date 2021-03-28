@@ -1,3 +1,45 @@
+#' filter results
+#' 
+#' filter results of [testUsage()]
+#' @param res output of [testUsage()]
+#' @param gp1 tag names involved in group 1
+#' @param gp2 tag names involved in group 2
+#' @param background_coverage_threshold  background coverage 
+#' cut off value. for each group, more than half of the long 
+#' form should greater than background_coverage_threshold. 
+#' for both group, at least in one group, more than half of 
+#' the short form should greater than background_coverage_threshold.
+#' @param P.Value_cutoff cutoff of P value
+#' @param adj.P.Val_cutoff  cutoff of adjust P value
+#' @param dPDUI_cutoff  cutoff of dPDUI
+#' @param PDUI_logFC_cutoff cutoff of PDUI log2 transformed fold change
+#'
+#' @return a data.frame
+#' @seealso [testUsage()]
+#' @export
+#'
+#' @examples
+#' path <- file.path(find.package("InPAS"), "extdata")
+#' load(file.path(path, "CPs.MAQC.rda"))
+#' load(file.path(path, "coverage.MAQC.rda"))
+#' library(BSgenome.Hsapiens.UCSC.hg19)
+#' data(utr3.hg19)
+#' res <- testUsage(CPsites=CPs, 
+#'                 coverage=coverage, 
+#'                 genome=BSgenome.Hsapiens.UCSC.hg19,
+#'                 utr3=utr3.hg19, 
+#'                 method="fisher.exact",
+#'                 gp1=c("Brain.auto", "Brain.phiX"),
+#'                 gp2=c("UHR.auto", "UHR.phiX"))
+#' filterRes(res, 
+#'          gp1=c("Brain.auto", "Brain.phiX"),
+#'          gp2=c("UHR.auto", "UHR.phiX"),
+#'          background_coverage_threshold=2, 
+#'          P.Value_cutoff=0.05,
+#'          adj.P.Val_cutoff=0.05, 
+#'          dPDUI_cutoff=0.3, 
+#'          PDUI_logFC_cutoff=.59)
+
 filterRes <- function(res,
                       gp1, gp2, 
                       background_coverage_threshold=2, 
@@ -30,7 +72,7 @@ filterRes <- function(res,
         return(res)
     }
     ## for each group, at least in one group, more than half of the long form should greater than background_coverage_threshold
-    ## for both group, at leat in one group, more than half of the short form should greater than background_coverage_threshold
+    ## for both group, at least in one group, more than half of the short form should greater than background_coverage_threshold
     coln <- colnames(res$short)
     if(!all(c(gp1, gp2) %in% coln)){
         stop("gp1 and gp2 must be the tags of samples (colnames of res$short)")

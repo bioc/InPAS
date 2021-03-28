@@ -3,6 +3,7 @@ test_getUTR3eSet <- function(){
     load(file.path(path, "coverage.MAQC.rda"))
     load(file.path(path, "CPs.MAQC.rda"))
     load(file.path(path, "eset.MAQC.rda"))
+    library(BSgenome.Hsapiens.UCSC.hg19)
     tags <- c("Brain.auto", "Brain.phiX", "UHR.auto", "UHR.phiX")
     g <- factor(gsub("\\..*$", "", tags))
     design <- model.matrix(~-1+g)

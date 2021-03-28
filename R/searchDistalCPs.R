@@ -1,3 +1,23 @@
+#' search distal CP sites
+#' 
+#' search distal CP sites
+#'
+#' @param chr.cov.merge coverage of current chromosome
+#' @param conn_next_utr3 joint to next 3UTR or not (used for 
+#' [removeUTR3__UTR3()])
+#' @param curr_UTR GRanges of current 3UTR
+#' @param window_size window size
+#' @param depth.weight output of [depthWeight()]
+#' @param long_coverage_threshold cutoff value for coverage of long form 3UTR
+#' @param background local background range
+#' @param z2s cut off background scores. see [zScoreThreshold()]
+#'
+#' @return a list
+#' @seealso [PAscore2()]
+#' @import S4Vectors
+#' @keywords internal
+#'
+
 searchDistalCPs <- function(chr.cov.merge,
                             conn_next_utr3,
                             curr_UTR, 
@@ -17,7 +37,7 @@ searchDistalCPs <- function(chr.cov.merge,
         # the proximal CP site should be the known-utr3-end, 
         # and distal site should be the end of gap
         next.exon.gap <- .ele[grepl("next.exon.gap", names(.ele))]
-        # remove the gaps with 0 width > window_size
+        # remove the gaps with 0 width and  > window_size
         next.exon.gap.rle <- Rle(next.exon.gap)
         id <- which(runLength(next.exon.gap.rle)>window_size & 
                         runValue(next.exon.gap.rle)==0)
@@ -63,7 +83,7 @@ searchDistalCPs <- function(chr.cov.merge,
                         id <- min(c(z2, id))
                     }
                 }
-            }else{
+            } else {
                 ##background == long_coverage_threshold
                 z2 <- which(next.exon.gap.split < long_coverage_threshold)
                 if(length(z2)>0){
@@ -130,6 +150,7 @@ searchDistalCPs <- function(chr.cov.merge,
     conn_next_utr3, 
     curr_UTR,
     SIMPLIFY=FALSE)
+    
     dCPs <- do.call(rbind, lapply(distalCPs, `[[`, "info"))
     chr.cov.merge <- lapply(distalCPs, `[[`, "cov")
     next.exon.gap <- lapply(distalCPs, `[[`, "gap")

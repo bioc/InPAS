@@ -39,10 +39,12 @@ NOtest_searchDistalCPs <- function(){
     genome <- BSgenome.Mmusculus.UCSC.mm10
     
     coverage <- coverageFromBedGraph(filename, tags="test", 
-                                     genome=genome, 
+                                     genome=genome,
+                                     removeScaffolds = TRUE,
                                      hugeData=FALSE)
     CP <- CPsites(coverage=coverage, genome=genome, 
-                  utr3=utr3, coverage_threshold=5, long_coverage_threshold=5)
+                  utr3=utr3, coverage_threshold=5, 
+                  long_coverage_threshold=5)
     checkCPs(CP, 399, 1000, "novel distal")
     
     # local background
@@ -72,7 +74,8 @@ NOtest_searchDistalCPs <- function(){
                                      genome=genome, 
                                      hugeData=FALSE)
     CP <- CPsites(coverage=coverage, genome=genome, txdb=txdb,
-                  utr3=utr3, coverage_threshold=5, long_coverage_threshold=5,
+                  utr3=utr3, coverage_threshold=5, 
+                  long_coverage_threshold=5,
                   background="10K")
     checkCPs(CP, proximal=4909476, type="novel distal")
     
@@ -96,6 +99,7 @@ test_CPsites_utr3Usage<-function(){
     
     coverage <- coverageFromBedGraph(filename, tags="test", 
                                      genome=genome, 
+                                     removeScaffolds = TRUE,
                                      hugeData=FALSE)
     CP <- CPsites(coverage=coverage, genome=genome, 
                   utr3=utr3, coverage_threshold=5, long_coverage_threshold=5)
@@ -111,10 +115,12 @@ test_CPsites_utr3Usage<-function(){
     export(testGR2, filename2, format="BEDGraph")
     coverage <- coverageFromBedGraph(c(filename, filename2), 
                                      tags=c("test1", "test2"), 
-                                     genome=genome, 
+                                     genome=genome,
+                                     removeScaffolds = TRUE,
                                      hugeData=FALSE)
     CP <- CPsites(coverage=coverage, genome=genome, 
-                  utr3=utr3, coverage_threshold=5, long_coverage_threshold=5)
+                  utr3=utr3, coverage_threshold=5, 
+                  long_coverage_threshold=5)
     checkCPs(CP, 399, 1000, "novel distal")
     
     res <- utr3UsageEstimation(CP, coverage, genome=genome, 
@@ -137,6 +143,8 @@ test_getCov_seqlevelsStyle <- function(){
     genome <- BSgenome.Mmusculus.UCSC.mm10
     
     coverage <- coverageFromBedGraph(filename, tags="test", 
-                                     genome=genome, 
+                                     genome=genome,
+                                     removeScaffolds = TRUE,
                                      hugeData=FALSE)
 }
+

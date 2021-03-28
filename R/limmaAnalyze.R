@@ -1,4 +1,47 @@
-limmaAnalyze <- function(UTR3eset, design, contrast.matrix, coef=1, robust=FALSE, ...){
+#' use limma to analyze the PDUI
+#' 
+#' use limma to analyze the PDUI
+#'
+#' @param UTR3eset an [UTR3eSet-class] object
+#' @param design the design matrix of the experiment, with rows 
+#' corresponding to arrays and columns to coefficients to be 
+#' estimated. Defaults to the unit vector meaning that the arrays 
+#' are treated as replicates. see [stats::model.matrix()]
+#' @param contrast.matrix numeric matrix with rows corresponding to 
+#' coefficients in fit and columns containing contrasts. May be a 
+#' vector if there is only one contrast. 
+#' see [limma::makeContrasts()]
+#' @param coef column number or column name specifying which 
+#' coefficient or contrast of the linear model is of interest. 
+#' see more [limma::topTable()]. default value: 1
+#' @param robust logical, should the estimation of the empirical 
+#' Bayes prior parameters be robustified against outlier 
+#' sample variances?
+#' @param ... other arguments are passed to lmFit
+#'
+#' @return fit results of eBayes by limma. It is an object of class 
+#' [limma::MArrayLM-class] containing everything found in fit. 
+#' see [limma::eBayes()]
+#' @export
+#' @import limma
+#' 
+#' @seealso [singleSampleAnalyze()], [singleGroupAnalyze()],
+#' [fisherExactTest()]
+#'
+#' @examples
+#' library(limma)
+#' path <- file.path(find.package("InPAS"), "extdata")
+#' load(file.path(path, "eset.MAQC.rda"))
+#' tags <- colnames(eset$PDUI.log2)
+#' g <- factor(gsub("\\\\..*$", "", tags))
+#' design <- model.matrix(~-1+g)
+#' colnames(design) <- c("Brain", "UHR")
+#' contrast.matrix <- makeContrasts(contrasts="Brain-UHR",levels=design)
+#' res <- limmaAnalyze(eset, design, contrast.matrix)
+#' head(res)
+
+limmaAnalyze <- function(UTR3eset, design, contrast.matrix, 
+                         coef=1, robust=FALSE, ...){
     if(missing(design)||missing(contrast.matrix)){
         stop("desing and contrast.matrix is required.")
     }

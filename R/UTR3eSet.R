@@ -1,3 +1,21 @@
+#' UTR3eSet-class
+#'  
+#' An object of class [UTR3eSet-class] represents the results of 3' 
+#' UTR usage
+#' @name UTR3eSet-class
+#' @slot usage GRanges. 
+#' @slot PDUI matrix. 
+#' @slot PDUI.log2 matrix. 
+#' @slot short matrix. 
+#' @slot long matrix. 
+#' @slot signals list. 
+#' @slot testRes matrix. 
+#' 
+#' @return
+#' @import methods
+#' @export
+#'
+
 setClass("UTR3eSet",
          representation(usage="GRanges", PDUI="matrix",
                         PDUI.log2="matrix", 
@@ -6,21 +24,67 @@ setClass("UTR3eSet",
                         signals="list",
                         testRes="matrix"))
 
+#' Constructor 
+#' 
+#' @name new
+#' @param ... data for constructing an object of [UTR3eSet-class]
+#' @rdname UTR3eSet-class
+#' @return an object of [UTR3eSet-class]
+#' 
 UTR3eSet <- function(...){
     new("UTR3eSet", ...)
 }
 
+#' Accessor function for UTR3eSet class
+#' 
+#' @name $
+#' @param UTR3eSet an object of [UTR3eSet-class]
+#' @param x an object of [UTR3eSet-class]
+#' @param name slot name
+#' @rdname UTR3eSet-class
+#' @return a slot value of an object of UTR3eSet class
+#' @exportMethod $
+#' @aliases $,UTR3eSet-method
+#'
+
 setMethod("$", "UTR3eSet", function(x, name) slot(x, name))
+
+#' Set slot information of UTR3eSet
+#' 
+#' @name $<-
+#' @param x an object of [UTR3eSet-class]
+#' @param name slot name
+#' @param value a value to be assigned
+#' @rdname UTR3eSet-class
+#' @exportMethod $<-
+#' @aliases $<-,UTR3eSet-method
+#' 
 setReplaceMethod("$", "UTR3eSet",
                  function(x, name, value){
                      slot(x, name, check = TRUE) <- value
                      x
                  })
 
+#' convert an object of UTR3eSet class to an ExpressionSet object
+#' 
+#' @name as
+#' @param from an object of [UTR3eSet-class]
+#' @param to an ExpressionSet object
+#' @rdname UTR3eSet-class
+#' @export
+#' 
 setAs(from="UTR3eSet", to="ExpressionSet", function(from){
     ExpressionSet(assayData=from$PDUI.log2,
                   featureData=AnnotatedDataFrame(as.data.frame(from$usage)))
 })
+
+#' convert an object of UTR3eSet class to a GRanges object
+#' 
+#' @name as
+#' @param from an object of [UTR3eSet-class]
+#' @param to an object of GRanges
+#' @rdname UTR3eSet-class
+#' @export
 
 setAs(from="UTR3eSet", to="GRanges", function(from){
     n <- from$usage$transcript
@@ -50,6 +114,13 @@ setAs(from="UTR3eSet", to="GRanges", function(from){
     r
 })
 
+#' print method for UTR3eSet-class 
+#' 
+#' @name show
+#' @param object an object 
+#' @rdname UTR3eSet-class
+#' @exportMethod show
+#' @aliases show,UTR3eSet-method
 setMethod("show", "UTR3eSet", function(object){
     cat("This is an object of UTR3eSet\n", "slot usage:\n")
     show(object$usage)

@@ -1,3 +1,30 @@
+#' prepare the files for GSEA analysis
+#' 
+#' output the log2 transformed delta PDUI txt file and chip 
+#' file for GSEA analysis
+#'
+#' @param eset a [UTR3eSet-class] object
+#' @param groupList group list of tag names
+#' @param Preranked logical value, out preranked or not
+#' @param folder output folder
+#' @param rnkFilename filename of preranked file
+#' @param chipFilename filename of chip
+#' @param dataFilename filename of dataset
+#' @param PhenFilename filename of Phenotype labels
+#'
+#' @return None
+#' @import Biobase
+#' @importFrom utils write.table
+#' @export
+#'
+#' @examples
+#' file <- system.file("extdata", "eset.MAQC.rda", package="InPAS")
+#' load(file)
+#' gp1=c("Brain.auto", "Brain.phiX")
+#' gp2=c("UHR.auto", "UHR.phiX")
+#' groupList <- list(Brain=gp1, UHR=gp2)
+#' prepare4GSEA(eset, groupList=groupList, Preranked=FALSE)
+#' 
 prepare4GSEA <- function(eset, groupList, Preranked=TRUE,
                          folder=".", 
                          rnkFilename="InPAS.rnk",
@@ -19,7 +46,7 @@ prepare4GSEA <- function(eset, groupList, Preranked=TRUE,
         rank <- data.frame(symbol=usage$symbol, p.value=1-testRes[, "P.Value"])
         write.table(rank, file.path(folder, rnkFilename),
                     sep="\t", quote=FALSE, row.names=F, col.names=F)
-    }else{
+    } else {
         eset <- as(eset, "ExpressionSet")
         exprs <- exprs(eset)
         samples <- colnames(exprs)

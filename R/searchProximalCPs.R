@@ -1,3 +1,26 @@
+#' search proximal CPsites
+#' 
+#' search proximal CPsites
+#'
+#' @param CPs output from [searchDistalCPs()] or [distalAdj()]
+#' @param curr_UTR GRanges for current 3' UTR
+#' @param window_size window size
+#' @param MINSIZE MINSIZE for short form
+#' @param cutEnd a numeric(1) between 0 and 1. The percentage of 
+#' nucleotides should be removed from the end before search, 
+#' 0.1 means 10 percent.
+#' @param search_point_START  start point for searching
+#' @param search_point_END  end point for searching
+#' @param two_way Search the proximal site from both direction 
+#' or not.
+#'
+#' @return a list
+#' @seealso [proximalAdj()], [polishCPs()],[proximalAdjByPWM()], 
+#' [proximalAdjByCleanUpdTSeq()], [PAscore()], [PAscore2()]
+#' @keywords internal
+#'
+#' @examples
+#' 1
 searchProximalCPs <- function(CPs, curr_UTR, 
                               window_size, MINSIZE,
                               cutEnd, 
@@ -15,12 +38,11 @@ searchProximalCPs <- function(CPs, curr_UTR,
     flag <- dCPs$distalCP > window_size
     dCPs$length[flag] <- dCPs$length[flag] + dCPs$distalCP[flag]
     dCPs$type <- ifelse(flag, "novel distal", "novel proximal")
-    dCPs$type[grepl("proximalCP", dCPs$annotatedProximalCP) & !flag] <- 
+    dCPs$type[grepl("proximalCP", dCPs$annotatedProximalCP) & 
+                  !flag] <- 
         "annotated proximal"
     dist_apa <- function(d, id){
-        ifelse(id>0, 
-               as.numeric(rownames(d)[id]), 
-               0)
+        ifelse(id > 0, as.numeric(rownames(d)[id]), 0)
     }
     chr.cov.merge <- lapply(chr.cov.merge, function(.ele){
         rownames(.ele) <- gsub("^.*_SEP_", "", rownames(.ele))
@@ -31,7 +53,7 @@ searchProximalCPs <- function(CPs, curr_UTR,
         if(len>0) {
             d[1:len, , drop=FALSE]
         }else{
-            d[FALSE,, drop=FALSE]
+            d[FALSE, , drop=FALSE]
         }
     }, chr.cov.merge, dCPs$length, SIMPLIFY=FALSE)
     proximalCP <- sapply(curr_UTR, function(.ele) 
@@ -75,6 +97,7 @@ searchProximalCPs <- function(CPs, curr_UTR,
         (!proximalCP)
     ##forward
     fit_value[flag] <- mapply(function(.ele, search_point_END){
+        ## for each sample find candidate CPsites
         fos <- apply(.ele, 2, optimalSegmentation, 
                      search_point_START=search_point_START, 
                      search_point_END=search_point_END)
@@ -111,7 +134,8 @@ searchProximalCPs <- function(CPs, curr_UTR,
             }, fit_value_rev[flag], search_point_end[flag], saved.id[flag], 
             SIMPLIFY=FALSE)
         ##combine forward and reverse
-        Predicted_Proximal_APA[flag] <- mapply(function(fv, idx, fv_rev, idx_rev){
+        Predicted_Proximal_APA[flag] <- 
+            mapply(function(fv, idx, fv_rev, idx_rev){
             ## sort the results
             f <- fv[idx]
             names(f) <- idx

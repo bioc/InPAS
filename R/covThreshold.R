@@ -1,20 +1,52 @@
+#' Helper function to get intronic regions
+#' 
+#' @param txdb An object of [GenomicFeatures::TxDb-class]
+#'
+#' @return GRanges of intronic regions not overlapping exons
+#' @import plyranges GenomicRanges  GenomicFeatures
+#' @keywords internal
+#'
+
+
+
 intronRegion <- function(txdb){
     if(!is(txdb, "TxDb")) stop("txdb must be an object of TxDb")
-    exons <- ranges(GeneRegionTrack(txdb))
-    exons <- reduce(exons)
-    genes <- genes(txdb)
-    genes <- reduce(genes)
+    exons <- exons(txdb, columns=c("exon_id", "gene_id")) %>%
+        plyranges::reduce_ranges_directed()
+    genes <- genes(txdb) %>%
+        plyranges::reduce_ranges_directed()
     dis <- disjoin(c(genes, exons))
     ol <- findOverlaps(dis, exons)
     intronRegion <- dis[-unique(queryHits(ol))]
 }
 
-## auto determin the long_coverage_threshold by 
+## automatically determining the long_coverage_threshold by 
 ## non_zero intergenicRegion coverage
-## auto determin the short_coverage_threshold by 
-## quatile of non_zero intragenicRegion coverage
+## auto determine the short_coverage_threshold by 
+## quantile of non_zero intragenicRegion coverage
+
+#' calculate the cutoff threshold of coverage
+#'
+#' calculate the cutoff threshold of coverage for long and short isoforms
+#' 
+#' @param coverage Coverage for each sample, output of [coverageFromBedGraph()]
+#' @param genome An object of [BSgenome::BSgenome-class]
+#' @param txdb An object of [GenomicFeatures::TxDb-class]
+#' @param utr3  Output of [utr3Annotation()]
+#' @param chr  Chromosome to be used for calculation, default is "chr1"
+#' @param hugeData Is this dataset consume too much memory? if it is 
+#' TRUE, the coverage will be saved into tempfiles.
+#' @param groupList Group list of tag names 
+#'
+#' @return  A numeric vector
+#' @import GenomicRanges plyranges
+#' @keywords internal
+
+
 covThreshold <- function(coverage, genome, txdb, utr3, 
                          chr="chr1", hugeData, groupList){
+    if(!is(txdb, "TxDb")) stop("txdb must be an object of TxDb")
+    
     totalCov <- totalCoverage(coverage, genome, hugeData, groupList)
     chr1totCov <- lapply(totalCov, "[[", chr)
     N <- length(chr1totCov)
@@ -24,12 +56,14 @@ covThreshold <- function(coverage, genome, txdb, utr3,
         }
     }
     chr1totCov <- chr1totCov[[1]]
-    intronRegion <- intronRegion(txdb)
-    intronRegion <- intronRegion[seqnames(intronRegion)==chr]
-    utr3Chr1Region <- utr3[seqnames(utr3)==chr]
-    utr3Chr1Region <- utr3Chr1Region[utr3Chr1Region$feature=="utr3"]
+    intronRegion <- intronRegion(txdb) %>% 
+        plyranges::filter(seqnames == chr)
+    
+    utr3Chr1Region <- utr3 %>% 
+        plyranges::filter(seqnames == chr & feature=="utr3")
+    
     covBg<-function(.cvg, start, end){
-        view <- Views(.cvg, start, end)#
+        view <- Views(.cvg, start, end)
         view <- viewApply(view, function(.ele) as.integer(.ele))
         view <- unlist(view)
         view <- view[view>=N]

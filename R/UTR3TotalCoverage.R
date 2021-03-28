@@ -1,3 +1,14 @@
+#' Compensate the coverage with GC-content or mappability
+#'
+#' @param view 
+#' @param comp 
+#' @param start 
+#' @param end 
+#'
+#' @return
+#' @keywords internal
+#'
+
 compensation <- function(view, comp, start, end){
     mapply(function(.ele, .s, .e){
         .ele * comp[.s:.e]
@@ -5,15 +16,40 @@ compensation <- function(view, comp, start, end){
 }
 
 
-##smooth methods
-fft.smooth <- function(sn, p){#
+
+#' Smoothing using Fast Discrete Fourier Transform
+#'
+#' @param sn 
+#' @param p 
+#'
+#' @return
+#' @keywords internal
+#'
+
+fft.smooth <- function(sn, p){
     if(length(sn)<=p) return(sn)
-    sn.fft <- fft(sn)#
-    sn.fft[p:length(sn.fft)] <- 0+0i#
-    sn.ifft = fft(sn.fft, inverse = TRUE)/length(sn.fft)#
-    Re(sn.ifft)#
+    sn.fft <- fft(sn)
+    sn.fft[p:length(sn.fft)] <- 0 + 0i
+    sn.ifft <- fft(sn.fft, inverse = TRUE)/length(sn.fft)
+    Re(sn.ifft)
 }
 
+#' extract coverage of 3UTR for CP sites prediction
+#' 
+#' extract 3UTR coverage from totalCov according to the [GenomicRanges::GRanges-class] object utr3.
+#'
+#' @param utr3 an [GenomicRanges::GRanges-class] object. It must be the output of [utr3Annotation()]
+#' @param totalCov total coverage for each sample. It must be the output of [totalCoverage()]
+#' @param gcCompensation GC compensation vector. Not support yet.
+#' @param mappabilityCompensation mappability compensation vector. Not support yet.
+#' @param FFT Use FFT smooth or not.
+#' @param fft.sm.power the cut-off frequency of FFT smooth.
+#'
+#' @return a list. level 1: chromosome; level 2: each transcripts;
+#' level3: data matrix
+#' @keywords internal
+#' @import GenomicRanges
+#' 
 UTR3TotalCoverage <- function(utr3, totalCov, 
                               gcCompensation=NA, 
                               mappabilityCompensation=NA, 
@@ -31,7 +67,7 @@ UTR3TotalCoverage <- function(utr3, totalCov,
             cov[[seq]][[n]] <- totalCov[[n]][[seq]]
         }
     }
-    mapply(function(.utr, .cvg, gcComp, mapComp){ ##memory consume
+    mapply(function(.utr, .cvg, gcComp, mapComp){ ##memory consuming
         strand <- as.character(strand(.utr))
         start <- start(.utr)
         end <- end(.utr)

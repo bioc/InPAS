@@ -1,8 +1,31 @@
-totalCoverage <- function(coverage, genome, hugeData, groupList=NULL){
+#' total coverage
+#' 
+#' for huge dataset, it will read in the coverage from temp files 
+#' and merge them by groups
+#' 
+#' @param coverage coverage for each sample, outputs of 
+#' [coverageFromBedGraph()]
+#' @param genome an object of [BSgenome::BSgenome-class]
+#' @param removeScaffolds logical(1), whether the scaffolds should be 
+#' removed from the genome
+#' @param hugeData  hugeData or not
+#' @param groupList tag names involved in each groups
+#'
+#' @return a coverage list
+#' @keywords internal
+#' @import S4Vectors
+#'
+#' @examples
+#' 1
+#' 
+totalCoverage <- function(coverage, genome, 
+                          hugeData = FALSE, 
+                          removeScaffolds = FALSE, 
+                          groupList=NULL)
+{
     if(!hugeData) return(coverage)
-    ## calculate total coverage
-    seqnames <- trimSeqnames(genome)
-    seqLen <- seqLen(genome)
+    seqnames <- trimSeqnames(genome, removeScaffolds)
+    seqLen <- seqLen(genome, removeScaffolds)
     
     if(!is.null(names(groupList))[1]){
         cov <- vector("list", length=length(groupList))
@@ -39,7 +62,7 @@ totalCoverage <- function(coverage, genome, hugeData, groupList=NULL){
         for(i in 1:length(cov)){
             cov[[i]] <- cov[[i]][idx]
         }
-    }else{
+    } else {
         cov <- vector("list", length=length(coverage))
         names(cov) <- names(coverage)
         for(i in 1:length(coverage)){
@@ -55,5 +78,5 @@ totalCoverage <- function(coverage, genome, hugeData, groupList=NULL){
             rm(cvg)
         }
     }
-    cov
+    cov  
 }

@@ -1,16 +1,56 @@
+#' prepare dataset for test
+#' 
+#' generate a UTR3eSet object with PDUI information for statistic tests
+#'
+#' @param CPsites outputs of [CPsites()]
+#' @param coverage coverage for each sample, outputs of [coverageFromBedGraph()]
+#' @param genome an object of [BSgenome::BSgenome-class]
+#' @param utr3 output of [utr3Annotation()]
+#' @param normalize normalization method
+#' @param ... parameter can be passed into [preprocessCore::normalize.quantiles.robust()]
+#' @param BPPARAM  An optional [BiocParallel::BiocParallelParam-class] 
+#' instance determining the parallel back-end to be used during
+#' evaluation, or a list of BiocParallelParam instances, to be
+#' applied in sequence for nested calls to bplapply.
+#' @param singleSample prepare data for singleSample analysis?
+#' default is FALSE
+#'
+#' @return An object of [UTR3eSet-class] which contains following elements:
+#' usage: an [GenomicRanges::GRanges-class] object with CP sites info. 
+#' PDUI: a matrix of PDUI 
+#' PDUI.log2: log2 transformed PDUI matrix
+#' short: a matrix of usage of short form
+#' long: a matrix of usage of long form
+#' if singleSample is TRUE, one more element, signals, will be included.
+#' @export
+#' @import GenomicRanges
+#' @importFrom preprocessCore colSummarizeAvg colSummarizeMedian normalize.quantiles normalize.quantiles.robust
+#'
+#' @examples
+#' path <- file.path(find.package("InPAS"), "extdata")
+#' load(file.path(path, "CPs.MAQC.rda"))
+#' load(file.path(path, "coverage.MAQC.rda"))
+#' library(BSgenome.Hsapiens.UCSC.hg19)
+#' data(utr3.hg19)
+#' getUTR3eSet(CPsites=CPs, 
+#'             coverage=coverage, 
+#'             genome=BSgenome.Hsapiens.UCSC.hg19,
+#'             utr3=utr3.hg19)
+
 getUTR3eSet <- function(CPsites, coverage, genome, utr3, 
-                        normalize=c("none", "quantiles", "quantiles.robust",
-                                 "mean", "median"),
+                        normalize=c("none", "quantiles", 
+                                    "quantiles.robust",
+                                     "mean", "median"),
                         ...,
                         BPPARAM=NULL, singleSample=FALSE){
     if(missing(coverage) || missing(CPsites))
-        stop("CPsites and coverage is required.")
+        stop("CPsites and coverage are required.")
     if(missing(utr3) || missing(genome)){
-        stop("utr3 and genome is required.")
+        stop("utr3 and genome are required.")
     }
     if(!is(genome, "BSgenome"))
         stop("genome must be an object of BSgenome.")
-    if(!is(utr3, "GRanges") | 
+    if(!is(utr3, "GRanges") || 
            !all(utr3$feature %in% c("utr3", "next.exon.gap", "CDS"))){
         stop("utr3 must be output of function of utr3Annotation")
     }
@@ -48,17 +88,20 @@ getUTR3eSet <- function(CPsites, coverage, genome, utr3,
     UTRusage.short.data <- UTRusage.total.data - UTRusage.long.data
     lt0 <- apply(UTRusage.short.data, 1, function(.ele) any(.ele<0))
     if(any(lt0)){
-        CDS <- utr3[utr3$feature=="CDS"]
-        CDS <- CDS[CDS$transcript %in% unique(PDUItable$transcript[lt0])]
+        CDS <- utr3 %>% plyranges::filter(feature=="CDS" & 
+                            transcript %in% unique(PDUItable$transcript[lt0])) 
+        
         CDSusage <- lastCDSusage(CDS, coverage, hugeData, BPPARAM)
         CDSusage.data <- do.call(rbind, CDSusage$data)
         rownames(CDSusage.data) <- CDSusage$transcript
         idx <- match(PDUItable$transcript[lt0], CDSusage$transcript)
         
+        ## why this is reasonable?
         UTRusage.short.data[lt0[!is.na(idx)]] <- 
             CDSusage.data[idx[!is.na(idx)],] - UTRusage.long.data[lt0[!is.na(idx)]]
         UTRusage.short.data[UTRusage.short.data<0] <- 0
     }
+    
     ##normalization?
     normalize.foo <- function(exprs, FUN){
         avgs = FUN(exprs)$Estimates
@@ -100,6 +143,8 @@ getUTR3eSet <- function(CPsites, coverage, genome, utr3,
     if(singleSample){
         signals.short <- UTRusage.total$data2
         signals.long <- UTRusage.long$data2
+        
+        ## ??
         cut50 <- function(x, y){
             z <- c(x, y)
             if(length(z)>50) {
