@@ -22,9 +22,11 @@ content in the range of 0 to 1
 helper function to calculate chromosome/scaffold level GC content
 }
 \examples{
+\dontrun{
 library(BSgenome.Mmusculus.UCSC.mm10)
 genome <- BSgenome.Mmusculus.UCSC.mm10
 InPAS:::gcContents(genome, "chr1")
+}
 }
 \author{
 Haibo Liu

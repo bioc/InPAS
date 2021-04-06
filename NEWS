@@ -1,3 +1,13 @@
+CHANGES IN VERSION 1.99.1
+------------------------
+
+    o add dontrun for getGCandMappability doc.
+    
+CHANGES IN VERSION 1.99.0
+------------------------
+
+    o merge Haibo's code.
+    
 CHANGES IN VERSION 1.19.1
 ------------------------
 

@@ -13,9 +13,11 @@
 #' @author Haibo Liu
 #'
 #' @examples
+#' \dontrun{
 #' library(BSgenome.Mmusculus.UCSC.mm10)
 #' genome <- BSgenome.Mmusculus.UCSC.mm10
 #' InPAS:::gcContents(genome, "chr1")
+#' }
 
 gcContents <- function(genome, seqname, nonATCGExclude = TRUE) {
   if (!is(genome, "BSgenome")) {
@@ -58,9 +60,11 @@ gcContents <- function(genome, seqname, nonATCGExclude = TRUE) {
 #' @references Cheung et al. Systematic bias in high-throughput sequencing data
 #'   and its correction by BEADS. Nucleic Acids Res. 2011 Aug;39(15):e103.
 #' @examples
+#' \dontrun{
 #' library(BSgenome.Mmusculus.UCSC.mm10)
 #' genome <- BSgenome.Mmusculus.UCSC.mm10
 #' InPAS:::gcComp(genome, "chr1")
+#' }
 
 gcComp <- function(genome, seqnames, window = 50, BPPARAM = NULL) {
   fref <- sapply(

@@ -29,9 +29,11 @@ chromosome/scaffold.
 Calculate read weights for GC composition-based coverage correction
 }
 \examples{
+\dontrun{
 library(BSgenome.Mmusculus.UCSC.mm10)
 genome <- BSgenome.Mmusculus.UCSC.mm10
 InPAS:::gcComp(genome, "chr1")
+}
 }
 \references{
 Cheung et al. Systematic bias in high-throughput sequencing data
