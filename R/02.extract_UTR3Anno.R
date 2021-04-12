@@ -511,6 +511,6 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
       utr3.fixed$feature,
       sep = "|"
     )
-  utr3.fixed <- split(utr3.fixed, seqnames(utr3.fixed))
+  utr3.fixed <- split(utr3.fixed, seqnames(utr3.fixed), drop = TRUE)
   utr3.fixed
 }

@@ -1,3 +1,8 @@
+CHANGES IN VERSION 1.99.2
+------------------------
+
+    o fix a bug if utr3 list is empty.
+    
 CHANGES IN VERSION 1.99.1
 ------------------------
 
