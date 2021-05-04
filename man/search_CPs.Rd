@@ -77,7 +77,7 @@ than 1. 0.1 means 10 percent, 25 means cut first 25 bases}
 
 \item{adjust_distal_polyA_end}{A logical(1) vector. If true, distal CP sites
 are subject to adjustment by the Naive Bayes classifier from the
-\link[cleanUpdTSeq:cleanUpdTSeq-package]{cleanUpdTSeq::cleanUpdTSeq-package}}
+\link[cleanUpdTSeq:cleanUpdTSeq]{cleanUpdTSeq::cleanUpdTSeq-package}}
 
 \item{coverage_threshold}{An integer(1) vector, specifying the cutoff
 threshold of coverage for first 100 nucleotides. If the coverage of first

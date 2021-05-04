@@ -54,14 +54,14 @@ get_PAscore2 <- function(seqname,
       function(.gr.s) {
         testSet.NaiveBayes <-
           buildFeatureVector(.gr.s,
-            BSgenomeName = genome,
-            upstream = classifier@info@upstream,
-            downstream = classifier@info@downstream,
-            wordSize = classifier@info@wordSize,
-            alphabet = classifier@info@alphabet,
-            sampleType = "unknown", replaceNAdistance = 30,
-            method = "NaiveBayes", ZeroBasedIndex = 1,
-            fetchSeq = TRUE
+                             genome = genome,
+                             upstream = classifier@info@upstream,
+                             downstream = classifier@info@downstream,
+                             wordSize = classifier@info@wordSize,
+                             alphabet = classifier@info@alphabet,
+                             sampleType = "unknown", replaceNAdistance = 30,
+                             method = "NaiveBayes",
+                             fetchSeq = TRUE
           )
         suppressMessages(.pred.prob.test <-
           predictTestSet(
@@ -77,7 +77,7 @@ get_PAscore2 <- function(seqname,
   rownames(pred.prob.test) <- NULL
   pred.prob.test <- pred.prob.test[match(
     names(gr.s),
-    pred.prob.test$PeakName
+    pred.prob.test$peak_name
   ), ,
   drop = FALSE
   ]
@@ -86,14 +86,14 @@ get_PAscore2 <- function(seqname,
     pred.prob.test <- pred.prob.test[match(gr$duplicated, gr.s$id), ,
       drop = FALSE
     ]
-    pred.prob.test[, "PeakName"] <- names(gr)
+    pred.prob.test[, "peak_name"] <- names(gr)
   }
   pred.prob.test <- cbind(pred.prob.test[, 1:4], idx, idx.gp)
-  pred.prob.test <- pred.prob.test[!is.na(pred.prob.test[, "pred.class"]), ]
-  pred.prob.test <- pred.prob.test[pred.prob.test[, "pred.class"] == 1, ]
+  pred.prob.test <- pred.prob.test[!is.na(pred.prob.test[, "pred_class"]), ]
+  pred.prob.test <- pred.prob.test[pred.prob.test[, "pred_class"] == 1, ]
   pred.prob.test <- pred.prob.test[order(
     pred.prob.test[, "idx.gp"],
-    -pred.prob.test[, "prob True"]
+    -pred.prob.test[, "prob_true_pA"]
   ), ]
   pred.prob.test <- pred.prob.test[!duplicated(pred.prob.test[, "idx.gp"]), ]
   pred.prob.test
