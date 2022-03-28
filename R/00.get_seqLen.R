@@ -1,35 +1,35 @@
 #' Get sequence lengths for chromosomes/scaffolds
 #'
-#' Get sequence lengths for chromosomes/scaffolds from a 
+#' Get sequence lengths for chromosomes/scaffolds from a
 #'   [BSgenome::BSgenome-class] object
-#' 
+#'
 #' @param genome An object of [BSgenome::BSgenome-class]
-#' @param removeScaffolds A logical(1) vector, whether the scaffolds should be
-#'   removed from the genome. If you use a TxDb containing alternative
-#'   scaffolds, you'd better to remove the scaffolds. To make things easy, we 
-#'   suggest users creating a [BSgenome::BSgenome-class] instance from the 
-#'   reference genome used for read alignment. For details, see the 
-#'   documentation of [BSgenome::forgeBSgenomeDataPkg()].
+#' @param chr2exclude A character vector, NA or NULL, specifying chromosomes or
+#'   scaffolds to be excluded for InPAS analysis. `chrM` and alternative scaffolds
+#'   representing different haplotypes should be excluded.
 #'
 #' @return A named numeric vector containing lengths per seqname, with the
 #'   seqnames as the names
 #' @seealso [GenomeInfoDb::Seqinfo-class]
-#' @importFrom BSgenome getSeq matchPWM
 #' @keywords internal
 #' @author Jianhong Ou, Haibo Liu
 #' @examples
 #' library(BSgenome.Mmusculus.UCSC.mm10)
 #' genome <- BSgenome.Mmusculus.UCSC.mm10
-#' InPAS:::get_seqLen(genome, removeScaffolds = FALSE)
-
-get_seqLen <- function(genome, removeScaffolds = FALSE) {
-  if (missing(genome) || !is(genome, "BSgenome")) {
+#' InPAS:::get_seqLen(
+#'   genome = genome,
+#'   chr2exclude = "chrM"
+#' )
+get_seqLen <- function(genome = getInPASGenome(),
+                       chr2exclude = getChr2Exclude()) {
+  if (!is(genome, "BSgenome")) {
     stop("genome must be an object of BSgenome class")
   }
-  len <- seqlengths(genome)
-  if (removeScaffolds) {
-    seqnames <- trim_seqnames(genome, removeScaffolds = removeScaffolds)
-    len <- len[seqnames]
+  if (!is.null(chr2exclude) && !is.character(chr2exclude)) {
+    stop("chr2Exclude must be NULL or a character vector")
   }
+  len <- seqlengths(genome)
+  seqnames <- trim_seqnames(genome, chr2exclude)
+  len <- len[seqnames]
   len
 }

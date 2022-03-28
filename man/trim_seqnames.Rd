@@ -2,26 +2,23 @@
 % Please edit documentation in R/00.trim_seqnames.R
 \name{trim_seqnames}
 \alias{trim_seqnames}
-\title{Filter the sequence names from a BSgenome object}
+\title{Filter sequence names from a BSgenome object}
 \usage{
-trim_seqnames(genome, removeScaffolds = FALSE)
+trim_seqnames(genome = getInPASGenome(), chr2exclude = getChr2Exclude())
 }
 \arguments{
 \item{genome}{An object of \link[BSgenome:BSgenome-class]{BSgenome::BSgenome}}
 
-\item{removeScaffolds}{A logical(1) vector, whether the scaffolds should be
-removed from the genome If you use a TxDb containing alternative
-scaffolds, you'd better to remove the scaffolds. To make things easy, we
-suggest users creating a \link[BSgenome:BSgenome-class]{BSgenome::BSgenome} instance from the
-reference genome used for read alignment. For details, see the
-documentation of \code{\link[BSgenome:BSgenomeForge]{BSgenome::forgeBSgenomeDataPkg()}}.}
+\item{chr2exclude}{A character vector, NA or NULL, specifying chromosomes or
+scaffolds to be excluded for InPAS analysis. \code{chrM} and alternative scaffolds
+representing different haplotypes should be excluded.}
 }
 \value{
 An character vector containing filtered seqnames
 }
 \description{
-Filter the sequence names from a BSgenome object so that only
-chromosome-level seqnames are kept
+Filter sequence names for scaffolds from a BSgenome object so that only
+chromosome-level seqnames are kept.
 }
 \author{
 Jianhong Ou, Haibo Liu

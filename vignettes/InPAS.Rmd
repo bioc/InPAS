@@ -7,8 +7,8 @@ bibliography: ref.bib
 csl: nature.csl
 abstract: >
    Alternative polyadenylation (APA) is one of the important post-transcriptional
-   regulation mechanisms which occurs in most mammalian genes. InPAS facilitates 
-   the discovery of novel APA sites and the differential usage of APA sites from 
+   regulation mechanisms which occurs in most mammalian genes. InPAS facilitates
+   the discovery of novel APA sites and the differential usage of APA sites from
    RNA-Seq data. It leverages cleanUpdTSeq[@sheppard2013accurate] to fine tune
    identified APA sites by removing false sites.
 vignette: >
@@ -27,86 +27,121 @@ However, massive RNA-seq datasets, which were originally created to quantify gen
 
 The major procedures in InPAS workflow are as follows:
 
-- Extract genome-wide 3' UTR annotation from known genome annotation 
+- Extract genome-wide 3' UTR annotation from known genome annotation
 - Set up a SQLite database for storing experimental metadata and tracking intermediate files generated during analysis
 - Convert genome-wide read coverage per sample from a BEDGraph file to a run-length encoding (Rle) format  
-- Identify putative cleavage and polyadenylation (CP) site for each gene based on the read coverage profile along 3' UTR regions and optionally remove potential false positive CP sites due to technical artifacts by using the Naive Bayes classifier (NBC) model from the cleanUpdTseq package or by using the polyadenylation scores by matching the position-weight matrix (PWM) for the hexamer polyadenylation signal (AAUAAA and the like) 
+- Identify putative cleavage and polyadenylation (CP) site for each gene based on the read coverage profile along 3' UTR regions and optionally remove potential false positive CP sites due to technical artifacts by using the Naive Bayes classifier (NBC) model from the cleanUpdTseq package or by using the polyadenylation scores by matching the position-weight matrix (PWM) for the hexamer polyadenylation signal (AAUAAA and the like)
 - Estimate usage of proximal and distal CP sites based on read coverage along the short and long 3' UTRs  
 - Identify differential usage of proximal and distal CP sites between different conditions leveraging different statistical models according to the experimental design  
 
 In addition, the InPAS package also provide functions to perform quality control over RNA-seq data coverage, visualize differential usage of proximal and distal CP sites for genes of interest, and prepare essential files for gene set enrichment analysis (GSEA) to reveal biological insights from genes with alternative CP sites.  
 
-# How to run InPAS 
+# How to run InPAS
 First, load the required packages, including InPAS, and species-specific genome and genome annotation database: BSgenome, TxDb and EnsDb.
 
 ```{r load_package}
+logger <- file(tempfile(), open = "wt")
+sink(logger, type="message")
 suppressPackageStartupMessages({
-    library(InPAS)
-    library(BSgenome.Mmusculus.UCSC.mm10)
-    library(TxDb.Mmusculus.UCSC.mm10.knownGene)
-    library(EnsDb.Hsapiens.v86)
-    library(EnsDb.Mmusculus.v79)
-    library(cleanUpdTSeq)
-    library("RSQLite")
-    library("DBI")
+library(InPAS)
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+library(EnsDb.Hsapiens.v86)
+library(EnsDb.Mmusculus.v79)
+library(cleanUpdTSeq)
+library(RSQLite)
+library(future.apply)
 })
 ```
-## Step 1: Extracting 3' UTR annotation  
-3' UTR annotation, including start and end coordinates, and strand information of 3' UTRs, last CDS and the gaps between 3' extremities of 3' UTRs and immediate downstream exons, is extracted using the function `extract_UTR3Anno` from genome annotation databases: a TxDb database and an Ensembldb database for a species of interest. For demonstration, the following snippet of R scripts shows how to extract 3' UTR annotation from a abridged TxDb for a human reference genome (hg19). In reality, users should use a TxDb for the most reliable genome annotation of the PRIMARY reference genome assembly (NOT including the alternative patches) used for RNA-seq read alignment. If a TxDb is not available for the species of interest, users can build one using the function makeTxDbFromUCSC, makeTxDbFromBiomart, makeTxDbFromEnsembl, or makeTxDbFromGFF from the GenomicFeatures
-package, depending on the sources of the genome annotation file.  
-
-```{r extract_annotation}
-samplefile <- system.file("extdata", 
-                          "hg19_knownGene_sample.sqlite",
-            package="GenomicFeatures")
-TxDb <- loadDb(samplefile)
-utr3_anno <- extract_UTR3Anno(TxDb = TxDb,
-                              edb = EnsDb.Hsapiens.v86,
-                              removeScaffolds = TRUE)
-
-head(utr3_anno$chr1)
-```
-This vignette will use the prepared 3' UTR annotation for the mouse reference genome mm10 for subsequent demonstration
-
-```{r load_anno}
-# load R object: utr3.mm10
-data(utr3.mm10)
-
-## convert the GRanges into GRangesList for the 3' UTR annotation
-utr3.mm10 <- split(utr3.mm10, seqnames(utr3.mm10))
-
-```
-
-## Step 2: set up a SQLite database
+## Step 1: set up a SQLite database
 Seven tables are created in the database. Table "metadata" stores  the metadata, including information for tag (sample name), condition (experimental treatment group), bedgraph_file (paths to BEDGraph files), and depth (whole genome coverage depth) which is initially set to zeros and later updated during analysis. Tables "sample_coverage", "chromosome_coverage", "total_coverage", "utr3_total_coverage", "CPsites", and "utr3cds_coverage" store names of intermediate files and the chromosome and tag (sample name) relevant to the files.   
 
 ```{r setup_sqlitedb}
+plan(sequential)
 data_dir <- system.file("extdata", package = "InPAS")
-bedgraphs <- c(file.path(data_dir, "Baf3.extract.bedgraph"), 
+bedgraphs <- c(file.path(data_dir, "Baf3.extract.bedgraph"),
                file.path(data_dir, "UM15.extract.bedgraph"))
 hugeData <- FALSE
 genome <- BSgenome.Mmusculus.UCSC.mm10
 
 tags <- c("Baf3", "UM15")
-metadata <- data.frame(tag = tags, 
+metadata <- data.frame(tag = tags,
                       condition = c("Baf3", "UM15"),
                       bedgraph_file = bedgraphs)
 
 ## In reality, don't use a temporary directory for your analysis. Instead, use a
 ## persistent directory to save your analysis output.
 outdir = tempdir()
-write.table(metadata, file =file.path(outdir, "metadata.txt"), 
+write.table(metadata, file = file.path(outdir =outdir, "metadata.txt"),
             sep = "\t", quote = FALSE, row.names = FALSE)
-    
-sqlite_db <- setup_sqlitedb(metadata = file.path(outdir, 
+
+sqlite_db <- setup_sqlitedb(metadata = file.path(outdir = outdir,
                                                  "metadata.txt"),
-                           outdir)
+                           outdir = outdir)
 
 ## check the database
 db_conn <- dbConnect(drv = RSQLite::SQLite(), dbname = sqlite_db)
 dbListTables(db_conn)
 dbReadTable(db_conn, "metadata")
 dbDisconnect(db_conn)
+```
+
+## Step 2: Extracting 3' UTR annotation  
+3' UTR annotation, including start and end coordinates, and strand information of 3' UTRs, last CDS and the gaps between 3' extremities of 3' UTRs and immediate downstream exons, is extracted using the function `extract_UTR3Anno` from genome annotation databases: a TxDb database and an Ensembldb database for a species of interest. For demonstration, the following snippet of R scripts shows how to extract 3' UTR annotation from a abridged TxDb for a human reference genome (hg19). In reality, users should use a TxDb for the most reliable genome annotation of the PRIMARY reference genome assembly (NOT including the alternative patches) used for RNA-seq read alignment. If a TxDb is not available for the species of interest, users can build one using the function makeTxDbFromUCSC, makeTxDbFromBiomart, makeTxDbFromEnsembl, or makeTxDbFromGFF from the GenomicFeatures
+package, depending on the sources of the genome annotation file.  
+
+```{r extract_annotation}
+samplefile <- system.file("extdata",
+                          "hg19_knownGene_sample.sqlite",
+            package="GenomicFeatures")
+TxDb <- loadDb(samplefile)
+seqnames <- seqnames(BSgenome.Hsapiens.UCSC.hg19)
+
+# exclude mitochondrial genome and alternative haplotypes
+chr2exclude <- c("chrM", "chrMT", seqnames[grepl("_(hap\\d+|fix|alt)$", seqnames, perl = TRUE)])
+
+# set up global variables for InPAS analysis
+set_globals(genome = BSgenome.Hsapiens.UCSC.hg19,
+            TxDb = TxDb,
+            EnsDb = EnsDb.Hsapiens.v86,
+            outdir = tempdir(),
+            chr2exclude = chr2exclude,
+            lockfile = tempfile())
+utr3_anno <-
+  extract_UTR3Anno(sqlite_db = sqlite_db,
+                   TxDb = getInPASTxDb(),
+                   edb = getInPASEnsDb(),
+                   genome = getInPASGenome(),
+                   outdir = getInPASOutputDirectory(),
+                   chr2exclude = getChr2Exclude())
+
+head(utr3_anno$chr1)
+```
+This vignette will use the prepared 3' UTR annotation for the mouse reference genome mm10 for subsequent demonstration
+
+```{r load_anno}
+## set global variables for mouse InPAS analysis
+set_globals(genome = BSgenome.Mmusculus.UCSC.mm10,
+            TxDb = TxDb.Mmusculus.UCSC.mm10.knownGene,
+            EnsDb = EnsDb.Mmusculus.v79,
+            outdir = tempdir(),
+            chr2exclude = "chrM",
+            lockfile = tempfile())
+
+tx <- parse_TxDb(sqlite_db = sqlite_db,
+                 TxDb = getInPASTxDb(),
+                 edb = getInPASEnsDb(),
+                 genome = getInPASGenome(),
+                 outdir = getInPASOutputDirectory(),
+                 chr2exclude = getChr2Exclude())
+
+# load R object: utr3.mm10
+data(utr3.mm10)
+
+## convert the GRanges into GRangesList for the 3' UTR annotation
+utr3.mm10 <- split(utr3.mm10, seqnames(utr3.mm10),
+                   drop = TRUE)
 ```
 
 ## Step 3: reformatting coverage data  
@@ -133,72 +168,68 @@ coverage[[tags[i]]] <- get_ssRleCov(bedgraph = bedgraphs[i],
                                     genome = genome,
                                     sqlite_db = sqlite_db,
                                     outdir = outdir,
-                                    removeScaffolds = TRUE,
-                                    BPPARAM = NULL)
+                                    chr2exclude = getChr2Exclude())
 }
-coverage_files <- assemble_allCov(sqlite_db, 
-                                  outdir, 
-                                  genome, 
-                                  removeScaffolds = FALSE)
+coverage <- assemble_allCov(sqlite_db,
+                            seqname = "chr6",
+                            outdir,
+                            genome = getInPASGenome())
 ```
 
 At this point, users can check the data quality in terms of coverage for all and expressed genes and 3' UTRs using `run_coverageQC`. This function output summarized coverage metrics: gene.coverage.rate, expressed.gene.coverage.rate, UTR3.coverage.rate, and UTR3.expressed.gene.subset.coverage.rate. The coverage rate of quality data should be greater than 0.75 for 3' UTRs of expressed genes.
 
 ```{r coverage_QC}
-edb <- EnsDb.Mmusculus.v79
-TxDb <- TxDb.Mmusculus.UCSC.mm10.knownGene
-run_coverageQC(sqlite_db, TxDb, edb, genome,
-               removeScaffolds = TRUE,
+if (.Platform$OS.type == "windows")
+{
+  plan(multisession)
+} else {
+  plan(multicore)
+}
+run_coverageQC(sqlite_db,
+               TxDb = getInPASTxDb(),
+               edb = getInPASEnsDb(),
+               genome = getInPASGenome(),
+               chr2exclude = getChr2Exclude(),
                which = GRanges("chr6",
                ranges = IRanges(98013000, 140678000)))
+plan(sequential)
 ```
 ## Step 4: Identifying potential CP sites  
-depth weight, Z-score cutoff thresholds, and  total coverage along 3' UTRs merged across biological replicates within each condition (huge data) or individual sample (non-huge data) are returned by the `setup_CPsSearch` function. Potential novel CP sites are identified for each chromosome using the `search_CPs` function. These potential CP sites can be filtered and/or adjusted using the Naive Bayes classifier provided by _cleanUpdTseq_ and/or by using the polyadenylation scores by simply matching the position-weight matrix (PWM) for the hexamer polyadenylation signal (AAUAAA and the like). 
+depth weight, Z-score cutoff thresholds, and  total coverage along 3' UTRs merged across biological replicates within each condition (huge data) or individual sample (non-huge data) are returned by the `setup_CPsSearch` function. Potential novel CP sites are identified for each chromosome using the `search_CPs` function. These potential CP sites can be filtered and/or adjusted using the Naive Bayes classifier provided by _cleanUpdTseq_ and/or by using the polyadenylation scores by simply matching the position-weight matrix (PWM) for the hexamer polyadenylation signal (AAUAAA and the like).
 
 ```{r search_CPs}
-## PWM for hexamer polyadenylation signal (AAUAAA and the like) from the InPAS
-## package
-load(system.file("extdata", "polyA.rda", package = "InPAS"))
-
-## load the Naive Bayes classifier model for classify CP sites from the 
+## load the Naive Bayes classifier model for classify CP sites from the
 ## cleanUpdTseq package
 data(classifier)
 
 prepared_data <- setup_CPsSearch(sqlite_db,
-                                 genome, 
-                                 utr3 = utr3.mm10,
+                                 genome = getInPASGenome(),
+                                 chr.utr3 = utr3.mm10$chr6,
+                                 seqname = "chr6",
                                  background = "10K",
-                                 TxDb = TxDb,
-                                 removeScaffolds = TRUE,
-                                 BPPARAM = NULL,
+                                 TxDb = getInPASTxDb(),
                                  hugeData = TRUE,
-                                 outdir=outdir,
-                                 silence = TRUE)
+                                 outdir = outdir,
+                                 silence = TRUE,
+                                 coverage_threshold = 5)
 
-cpsites <-  search_CPs(seqname = "chr6",
-                       sqlite_db = sqlite_db, 
-                       utr3 = utr3.mm10,
-                       background = prepared_data$background, 
-                       z2s = prepared_data$z2s,
-                       depth.weight = prepared_data$depth.weight,
-                       genome = genome, 
-                       MINSIZE = 10, 
+CPsites <- search_CPs(seqname = "chr6",
+                       sqlite_db = sqlite_db,
+                       genome = getInPASGenome(),
+                       MINSIZE = 10,
                        window_size = 100,
                        search_point_START = 50,
                        search_point_END = NA,
-                       cutStart = 10, 
                        cutEnd = 0,
+                       filter.last = TRUE,
                        adjust_distal_polyA_end = TRUE,
-                       coverage_threshold = 5,
                        long_coverage_threshold = 2,
-                       PolyA_PWM = pwm, 
+                       PolyA_PWM = NA,
                        classifier = classifier,
                        classifier_cutoff = 0.8,
-                       shift_range = 100,
+                       shift_range = 50,
                        step = 5,
-                       two_way = FALSE,
-                       hugeData = TRUE,
-                       outdir = outdir, 
+                       outdir = outdir,
                        silence = TRUE)
 ```
 
@@ -210,18 +241,17 @@ Estimate usage of proximal and distal CP sites based on read coverage along the 
 utr3_cds_cov <- get_regionCov(chr.utr3 = utr3.mm10[["chr6"]],
                               sqlite_db,
                               outdir,
-                              BPPARAM = NULL,
                               phmm = FALSE)
 
 eSet <- get_UTR3eSet(sqlite_db,
-                     normalize ="none", 
+                     normalize ="none",
                      singleSample = FALSE)
 ```
 ## Step 6. identifying differential PDUI events
-InPAS provides the function `test_dPDUI` to identify differential usage of proximal and distal CP sites between different conditions leveraging different statistical models according to the experimental design. InPAS offers statistical methods for single sample differential PDUI analysis, and single group analysis. Additionally, InPAS provides Fisher exact test for two-group unreplicated design, and empirical Bayes linear model leveraging the limma package for more complex design. The test results can be further filtered using the `filter_testOut` function based on the fraction samples within each condition with coverage data for the identified differential PDUI events, and/or cutoffs of nominal p-values, adjusted p-values or log2 (fold change). 
+InPAS provides the function `test_dPDUI` to identify differential usage of proximal and distal CP sites between different conditions leveraging different statistical models according to the experimental design. InPAS offers statistical methods for single sample differential PDUI analysis, and single group analysis. Additionally, InPAS provides Fisher exact test for two-group unreplicated design, and empirical Bayes linear model leveraging the limma package for more complex design. The test results can be further filtered using the `filter_testOut` function based on the fraction samples within each condition with coverage data for the identified differential PDUI events, and/or cutoffs of nominal p-values, adjusted p-values or log2 (fold change).
 
 ```{r dPDUI_test}
-test_out <- test_dPDUI(eset = eSet, 
+test_out <- test_dPDUI(eset = eSet,
                        method = "fisher.exact",
                        normalize = "none",
                        sqlite_db = sqlite_db)
@@ -243,13 +273,13 @@ InPAS package also provide functions, `get_usage4plot`, `plot_utr3Usage`, and `s
 ## Visualize dPDUI events                       
 gr <- GRanges("chr6", IRanges(128846245, 128850081), strand = "-")
 names(gr) <- "128846245-128850081"
-data4plot <- get_usage4plot(gr, 
-                            proximalSites = 128849193, 
+data4plot <- get_usage4plot(gr,
+                            proximalSites = 128849130,
                             sqlite_db,
-                            hugeData = TRUE) 
+                            hugeData = TRUE)
 
-plot_utr3Usage(usage_data = data4plot, 
-               vline_color = "purple", 
+plot_utr3Usage(usage_data = data4plot,
+               vline_color = "purple",
                vline_type = "dashed")
 ```
 
@@ -266,4 +296,6 @@ setup_GSEA(eset = test_out,
 # Session Info
 ```{r sessionInfo, results='asis'}
 sessionInfo()
+sink(type="message")
+close(logger)
 ```

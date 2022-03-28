@@ -4,16 +4,31 @@
 \alias{parse_TxDb}
 \title{Extract gene models from a TxDb object}
 \usage{
-parse_TxDb(TxDb = NULL, edb = NULL, removeScaffolds = FALSE)
+parse_TxDb(
+  sqlite_db = NULL,
+  TxDb = getInPASTxDb(),
+  edb = getInPASEnsDb(),
+  genome = getInPASGenome(),
+  chr2exclude = getChr2Exclude(),
+  outdir = getInPASOutputDirectory()
+)
 }
 \arguments{
+\item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
+\code{\link[=setup_sqlitedb]{setup_sqlitedb()}}. It can be \code{NULL}.}
+
 \item{TxDb}{An object of \link[GenomicFeatures:TxDb-class]{GenomicFeatures::TxDb}}
 
 \item{edb}{An object of \link[ensembldb:EnsDb-class]{ensembldb::EnsDb}}
 
-\item{removeScaffolds}{A logical(1) vector, whether the scaffolds should be
-removed from the genome If you use a TxDb containing alternative
-scaffolds, you'd better to remove the scaffolds.}
+\item{genome}{An object of \link[BSgenome:BSgenome-class]{BSgenome::BSgenome}}
+
+\item{chr2exclude}{A character vector, NA or NULL, specifying chromosomes or
+scaffolds to be excluded for InPAS analysis. \code{chrM} and alternative scaffolds
+representing different haplotypes should be excluded.}
+
+\item{outdir}{A character(1) vector, a path with write permission for storing
+InPAS analysis results. If it doesn't exist, it will be created.}
 }
 \value{
 A \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges} object for gene models
@@ -33,15 +48,51 @@ annotation can be very cumbersome.
 }
 \examples{
 library("EnsDb.Hsapiens.v86")
+library("BSgenome.Hsapiens.UCSC.hg19")
 library("GenomicFeatures")
+
+## set a sqlite database
+bedgraphs <- system.file("extdata", c(
+  "Baf3.extract.bedgraph",
+  "UM15.extract.bedgraph"
+),
+package = "InPAS"
+)
+tags <- c("Baf3", "UM15")
+metadata <- data.frame(
+  tag = tags,
+  condition = c("Baf3", "UM15"),
+  bedgraph_file = bedgraphs
+)
+outdir <- tempdir()
+write.table(metadata,
+  file = file.path(outdir, "metadata.txt"),
+  sep = "\t", quote = FALSE, row.names = FALSE
+)
+sqlite_db <- setup_sqlitedb(
+  metadata =
+    file.path(outdir, "metadata.txt"),
+  outdir
+)
+
 samplefile <- system.file("extdata",
-                         "hg19_knownGene_sample.sqlite",
-                          package = "GenomicFeatures")
+  "hg19_knownGene_sample.sqlite",
+  package = "GenomicFeatures"
+)
 TxDb <- loadDb(samplefile)
 edb <- EnsDb.Hsapiens.v86
-
-parsed_Txdb <- parse_TxDb(TxDb, edb, 
-                          removeScaffolds = TRUE)
+genome <- BSgenome.Hsapiens.UCSC.hg19
+seqnames <- seqnames(BSgenome.Hsapiens.UCSC.hg19)
+chr2exclude <- c(
+  "chrM", "chrMT",
+  seqnames[grepl("_(hap\\\\d+|fix|alt)$",
+    seqnames,
+    perl = TRUE
+  )]
+)
+parsed_Txdb <- parse_TxDb(sqlite_db, TxDb, edb, genome,
+  chr2exclude = chr2exclude
+)
 }
 \author{
 Haibo Liu

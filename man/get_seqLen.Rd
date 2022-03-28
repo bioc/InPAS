@@ -4,17 +4,14 @@
 \alias{get_seqLen}
 \title{Get sequence lengths for chromosomes/scaffolds}
 \usage{
-get_seqLen(genome, removeScaffolds = FALSE)
+get_seqLen(genome = getInPASGenome(), chr2exclude = getChr2Exclude())
 }
 \arguments{
 \item{genome}{An object of \link[BSgenome:BSgenome-class]{BSgenome::BSgenome}}
 
-\item{removeScaffolds}{A logical(1) vector, whether the scaffolds should be
-removed from the genome. If you use a TxDb containing alternative
-scaffolds, you'd better to remove the scaffolds. To make things easy, we
-suggest users creating a \link[BSgenome:BSgenome-class]{BSgenome::BSgenome} instance from the
-reference genome used for read alignment. For details, see the
-documentation of \code{\link[BSgenome:BSgenomeForge]{BSgenome::forgeBSgenomeDataPkg()}}.}
+\item{chr2exclude}{A character vector, NA or NULL, specifying chromosomes or
+scaffolds to be excluded for InPAS analysis. \code{chrM} and alternative scaffolds
+representing different haplotypes should be excluded.}
 }
 \value{
 A named numeric vector containing lengths per seqname, with the
@@ -27,7 +24,10 @@ Get sequence lengths for chromosomes/scaffolds from a
 \examples{
 library(BSgenome.Mmusculus.UCSC.mm10)
 genome <- BSgenome.Mmusculus.UCSC.mm10
-InPAS:::get_seqLen(genome, removeScaffolds = FALSE)
+InPAS:::get_seqLen(
+  genome = genome,
+  chr2exclude = "chrM"
+)
 }
 \seealso{
 \link[GenomeInfoDb:Seqinfo-class]{GenomeInfoDb::Seqinfo}

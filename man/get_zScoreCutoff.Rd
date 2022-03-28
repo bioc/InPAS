@@ -4,19 +4,29 @@
 \alias{get_zScoreCutoff}
 \title{Calculate local background cutoff value}
 \usage{
-get_zScoreCutoff(background, introns, totalCov, utr3, z = 2)
+get_zScoreCutoff(
+  background,
+  chr.introns,
+  chr.totalCov,
+  chr.utr3,
+  seqname,
+  z = 2
+)
 }
 \arguments{
 \item{background}{A character(1) vector, indicating how background coverage
 is defined.}
 
-\item{introns}{An object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges} for introns}
+\item{chr.introns}{An object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges} for introns
+of a give chromosome/scaffold}
 
-\item{totalCov}{total coverage, a list of output from \code{\link[=get_totalCov]{get_totalCov()}} for
-each chromosome}
+\item{chr.totalCov}{total coverage for a given chromosome/scaffold, an output
+from \code{\link[=get_totalCov]{get_totalCov()}} for a given chromosome/scaffold}
 
-\item{utr3}{An object of \link[GenomicRanges:GRangesList-class]{GenomicRanges::GRangesList}, output of
-\code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}}}
+\item{chr.utr3}{An object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges}, an element of
+the output of \code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}} for a given chromosome/scaffold}
+
+\item{seqname}{A character(1), the name of a chromosome/scaffold}
 
 \item{z}{Z score cutoff value}
 }

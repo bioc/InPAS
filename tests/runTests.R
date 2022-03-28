@@ -1,6 +1,15 @@
-require("BSgenome.Mmusculus.UCSC.mm10") || stop("can not load mm10 BSgenome.")
-require("TxDb.Mmusculus.UCSC.mm10.knownGene") || stop("can not load mm10 TxDb")
-require("rtracklayer") || stop("can not load rtracklayer.")
-require("GenomicRanges") || stop("can't load GenomicRanges")
-require("limma") || stop("can not load limma")
+pkgs_required <- c(
+  "BSgenome.Mmusculus.UCSC.mm10",
+  "TxDb.Mmusculus.UCSC.mm10.knownGene",
+  "EnsDb.Mmusculus.v79",
+  "rtracklayer",
+  "GenomicRanges",
+  "RUnit",
+  "limma", "future.apply"
+)
+for (pkg in pkgs_required)
+{
+  require(pkg, character.only = TRUE) || stop(pkg, " can't be loaded!")
+}
+
 BiocGenerics:::testPackage("InPAS")

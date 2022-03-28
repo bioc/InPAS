@@ -4,7 +4,7 @@
 \alias{setup_sqlitedb}
 \title{Create an SQLite database for storing metadata and paths to coverage files}
 \usage{
-setup_sqlitedb(metadata, outdir)
+setup_sqlitedb(metadata, outdir = getInPASOutputDirectory())
 }
 \arguments{
 \item{metadata}{A path to a tab-delimited file, with columns "tag", "condition",
@@ -13,7 +13,7 @@ name for each sample, such as "treatment" and "control", and a path to the
 bedgraph file for each sample}
 
 \item{outdir}{A character(1) vector, a path with write permission for storing
-the SQLite database. If it doesn't exist, it will be created.}
+InPAS analysis results. If it doesn't exist, it will be created.}
 }
 \value{
 A character(1) vector, the path to the SQLite database
@@ -31,19 +31,28 @@ chromosome (chromosome, paths to utr3 coverage file), respectively
 }
 \examples{
 if (interactive()) {
-   bedgraphs <- system.file("extdata",c("Baf3.extract.bedgraph",
-                                        "UM15.extract.bedgraph"), 
-                           package = "InPAS")
-   tags <- c("Baf3", "UM15")
-   metadata <- data.frame(tag = tags, 
-                          condition = c("Baf3", "UM15"),
-                          bedgraph_file = bedgraphs)
-   outdir = tempdir()
-   write.table(metadata, file =file.path(outdir, "metadata.txt"), 
-               sep = "\t", quote = FALSE, row.names = FALSE)
-   sqlite_db <- setup_sqlitedb(metadata = 
-                                 file.path(outdir, "metadata.txt"),
-                               outdir)
+  bedgraphs <- system.file("extdata", c(
+    "Baf3.extract.bedgraph",
+    "UM15.extract.bedgraph"
+  ),
+  package = "InPAS"
+  )
+  tags <- c("Baf3", "UM15")
+  metadata <- data.frame(
+    tag = tags,
+    condition = c("Baf3", "UM15"),
+    bedgraph_file = bedgraphs
+  )
+  outdir <- tempdir()
+  write.table(metadata,
+    file = file.path(outdir, "metadata.txt"),
+    sep = "\t", quote = FALSE, row.names = FALSE
+  )
+  sqlite_db <- setup_sqlitedb(
+    metadata =
+      file.path(outdir, "metadata.txt"),
+    outdir
+  )
 }
 }
 \author{

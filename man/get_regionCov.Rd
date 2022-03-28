@@ -4,25 +4,29 @@
 \alias{get_regionCov}
 \title{Get coverage for 3' UTR and last CDS regions on a single chromosome}
 \usage{
-get_regionCov(chr.utr3, sqlite_db, outdir, BPPARAM = NULL, phmm = FALSE)
+get_regionCov(
+  chr.utr3,
+  sqlite_db,
+  outdir = getInPASOutputDirectory(),
+  phmm = FALSE,
+  min.length.diff = 200
+)
 }
 \arguments{
-\item{chr.utr3}{one element of an output of \code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}}}
+\item{chr.utr3}{An object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges}, one element of an output of \code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}}}
 
 \item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
 \code{\link[=setup_sqlitedb]{setup_sqlitedb()}}.}
 
-\item{outdir}{A path to a folder for storing coverage data of 3' UTRs and
-last CDSs on a given chromosome/scaffold. If it doesn't exist, it will be
-created.}
-
-\item{BPPARAM}{an optional \link[BiocParallel:BiocParallelParam-class]{BiocParallel::BiocParallelParam} instance
-determining the parallel back-end to be used during evaluation, or a list
-of BiocParallelParam instances, to be applied in sequence for nested calls
-to bplapply. It can be set to NULL or bpparam()}
+\item{outdir}{A character(1) vector, a path with write permission for storing
+InPAS analysis results. If it doesn't exist, it will be created.}
 
 \item{phmm}{A logical(1) vector, indicating whether data should be
 prepared for singleSample analysis? By default, FALSE}
+
+\item{min.length.diff}{An integer(1) vector, specifying minimal length
+difference between proximal and distal APA sites which should be met to be
+considered for differential APA analysis. Default is 200 bp.}
 }
 \value{
 coverage view in GRanges

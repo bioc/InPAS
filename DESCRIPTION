@@ -1,7 +1,6 @@
 Package: InPAS
-Title: A Bioconductor package for identifying novel Alternative PolyAdenylation 
-       Sites (PAS) from RNA-seq data
-Version: 2.3.0
+Title: Identify Novel Alternative PolyAdenylation Sites (PAS) from RNA-seq data
+Version: 2.3.1
 Authors@R: c(person("Jianhong", "Ou", role = c("aut", "cre"), 
              email = "jianhong.ou@duke.edu"), 
              person("Haibo", "Liu", role = c("aut"), 
@@ -17,27 +16,21 @@ Description: Alternative polyadenylation (APA) is one of the important post-
              differential usage of APA sites from RNA-Seq data. It leverages 
              cleanUpdTSeq to fine tune identified APA sites by removing false 
              sites.
-biocViews: RNASeq, Sequencing, AlternativeSplicing, Coverage,
-        DifferentialSplicing, GeneRegulation, Transcription,
-        ImmunoOncology
+biocViews: Alternative Polyadenylation, Differential Polyadenylation Site Usage, 
+           RNA-seq, Gene Regulation, Transcription
 License: GPL (>= 2)
-Imports: AnnotationDbi, BSgenome, cleanUpdTSeq, preprocessCore, 
-        IRanges, GenomeInfoDb, depmixS4, limma, BiocParallel, 
-	Biostrings, dplyr, magrittr, plyranges, readr, RSQLite, 
-	DBI, purrr, GenomicFeatures, ggplot2, reshape2 
-Depends: R (>= 3.1), methods, Biobase, GenomicRanges, S4Vectors
-Suggests: RUnit, BiocGenerics, 
-        BiocManager, rtracklayer,
-        BiocStyle, knitr, markdown, rmarkdown,
-        EnsDb.Hsapiens.v86,
-        EnsDb.Mmusculus.v79,
-        BSgenome.Hsapiens.UCSC.hg19,
-        BSgenome.Mmusculus.UCSC.mm10,
-        TxDb.Hsapiens.UCSC.hg19.knownGene,
-        TxDb.Mmusculus.UCSC.mm10.knownGene
+Imports: AnnotationDbi,batchtools,Biobase,Biostrings,BSgenome,cleanUpdTSeq,
+         depmixS4,dplyr,flock,future,future.apply,GenomeInfoDb,GenomicRanges,
+         GenomicFeatures, ggplot2, IRanges, limma, magrittr,methods,parallelly, 
+         plyranges, preprocessCore, readr,reshape2, RSQLite, stats,S4Vectors, 
+         utils
+Depends: R (>= 3.1)
+Suggests: BiocGenerics,BiocManager, BiocStyle, BSgenome.Mmusculus.UCSC.mm10,
+          BSgenome.Hsapiens.UCSC.hg19, EnsDb.Hsapiens.v86, EnsDb.Mmusculus.v79,
+          knitr, markdown, rmarkdown, rtracklayer, RUnit, grDevices,
+          TxDb.Hsapiens.UCSC.hg19.knownGene,TxDb.Mmusculus.UCSC.mm10.knownGene
 VignetteBuilder: knitr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Roxygen: list(markdown = TRUE)
 LazyData: true
 Encoding: UTF-8
-

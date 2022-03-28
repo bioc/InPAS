@@ -36,7 +36,7 @@ site is classified as true CP sites. The value should be between 0.5 and 1.
 Default, 0.8.}
 }
 \value{
-a data frame
+a data frame or NULL
 }
 \description{
 calculate CP score by cleanUpdTSeq
@@ -45,6 +45,6 @@ calculate CP score by cleanUpdTSeq
 \code{\link[=get_PAscore]{get_PAscore()}}
 }
 \author{
-Jianhong Ou
+Jianhong Ou, Haibo Liu
 }
 \keyword{internal}

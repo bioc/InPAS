@@ -8,11 +8,12 @@ filter_testOut(
   res,
   gp1,
   gp2,
+  outdir = getInPASOutputDirectory(),
   background_coverage_threshold = 2,
   P.Value_cutoff = 0.05,
   adj.P.Val_cutoff = 0.05,
-  dPDUI_cutoff = 0.3,
-  PDUI_logFC_cutoff
+  dPDUI_cutoff = 0.2,
+  PDUI_logFC_cutoff = log2(1.5)
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ purpose if both are specified; otherwise only other specified thresholds
 are used for filtering.}
 
 \item{gp2}{tag names involved in group 2}
+
+\item{outdir}{A character(1) vector, a path with write permission for storing
+InPAS analysis results. If it doesn't exist, it will be created.}
 
 \item{background_coverage_threshold}{background coverage cut off value. for
 each group, more than half of the long form should greater than
@@ -53,22 +57,26 @@ tags <- colnames(eset@PDUI)
 g <- factor(gsub("\\\\..*$", "", tags))
 design <- model.matrix(~ -1 + g)
 colnames(design) <- c("Brain", "UHR")
-contrast.matrix <- makeContrasts(contrasts = "Brain-UHR", 
-                                 levels = design)
-res <- test_dPDUI(eset = eset,
-                  method = "limma",
-                  normalize = "none",
-                  design = design,
-                  contrast.matrix = contrast.matrix)
+contrast.matrix <- makeContrasts(
+  contrasts = "Brain-UHR",
+  levels = design
+)
+res <- test_dPDUI(
+  eset = eset,
+  method = "limma",
+  normalize = "none",
+  design = design,
+  contrast.matrix = contrast.matrix
+)
 filter_testOut(res,
-               gp1 = c("Brain.auto", "Brain.phiX"),
-               gp2 = c("UHR.auto", "UHR.phiX"),
-               background_coverage_threshold = 2,
-               P.Value_cutoff = 0.05,
-               adj.P.Val_cutoff = 0.05,
-               dPDUI_cutoff = 0.3,
-               PDUI_logFC_cutoff = .59)
-               
+  gp1 = c("Brain.auto", "Brain.phiX"),
+  gp2 = c("UHR.auto", "UHR.phiX"),
+  background_coverage_threshold = 2,
+  P.Value_cutoff = 0.05,
+  adj.P.Val_cutoff = 0.05,
+  dPDUI_cutoff = 0.3,
+  PDUI_logFC_cutoff = .59
+)
 }
 \seealso{
 \code{\link[=test_dPDUI]{test_dPDUI()}}

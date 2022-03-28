@@ -6,15 +6,15 @@
 \usage{
 run_coverageQC(
   sqlite_db,
-  TxDb,
-  edb,
-  genome,
+  TxDb = getInPASTxDb(),
+  edb = getInPASEnsDb(),
+  genome = getInPASGenome(),
   cutoff_readsNum = 1,
   cutoff_expdGene_cvgRate = 0.1,
   cutoff_expdGene_sampleRate = 0.5,
-  removeScaffolds = FALSE,
-  BPPARAM = NULL,
+  chr2exclude = getChr2Exclude(),
   which = NULL,
+  future.chunk.size = 1,
   ...
 )
 }
@@ -49,28 +49,36 @@ cutoff_expdGene_sampleRate}
 
 \item{cutoff_expdGene_sampleRate}{See cutoff_expdGene_cvgRate}
 
-\item{removeScaffolds}{A logical(1) vector, whether the scaffolds should be
-removed from the genome If you use a TxDb containing alternative
-scaffolds, you'd better to remove the scaffolds.}
-
-\item{BPPARAM}{an optional \link[BiocParallel:BiocParallelParam-class]{BiocParallel::BiocParallelParam} instance
-determining the parallel back-end to be used during evaluation, or a list
-of BiocParallelParam instances, to be applied in sequence for nested calls
-to bplapply. It can be set to NULL or bpparam()}
+\item{chr2exclude}{A character vector, NA or NULL, specifying chromosomes or
+scaffolds to be excluded for InPAS analysis. \code{chrM} and alternative scaffolds
+representing different haplotypes should be excluded.}
 
 \item{which}{an object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges} or NULL. If it is
 not NULL, only the exons overlapping the given ranges are used. For fast
 data quality control, set which to Granges for one or a few large
 chromosomes.}
 
+\item{future.chunk.size}{The average number of elements per future
+("chunk"). If Inf, then all elements are processed in a single future.
+If NULL, then argument future.scheduling = 1 is used by default. Users can
+set future.chunk.size = total number of elements/number of cores set for
+the backend. See the future.apply package for details.}
+
 \item{...}{Not used yet}
 }
 \value{
-A data frame with colnames: gene.coverage.rate: coverage per base for
-all genes, expressed.gene.coverage.rate: coverage per base for expressed
-genes, UTR3.coverage.rate: coverage per base for all 3'
-UTRs,UTR3.expressed.gene.subset.coverage. rate: coverage per base for 3'
-UTRs of expressed genes. and rownames: the names of coverage
+A data frame as described below.
+\describe{
+\item{gene.coverage.rate}{overage per base for
+all genes}
+\item{expressed.gene.coverage.rate}{coverage per base for expressed
+genes}
+\item{UTR3.coverage.rate}{coverage per base for all 3'
+UTRs}
+\item{UTR3.expressed.gene.subset.coverage.rate}{coverage per base for 3'
+UTRs of expressed genes}
+\item{rownames}{the names of coverage}
+}
 }
 \description{
 Calculate coverage over gene bodies and 3UTRs. This function is used for
@@ -79,46 +87,70 @@ RNA-seq library.
 }
 \examples{
 if (interactive()) {
-   library("BSgenome.Mmusculus.UCSC.mm10")
-   library("TxDb.Mmusculus.UCSC.mm10.knownGene")
-   library("EnsDb.Mmusculus.v79")
-   
-   genome <- BSgenome.Mmusculus.UCSC.mm10
-   TxDb <- TxDb.Mmusculus.UCSC.mm10.knownGene
-   edb <- EnsDb.Mmusculus.v79
-   
-   bedgraphs <- system.file("extdata",c("Baf3.extract.bedgraph",
-                                        "UM15.extract.bedgraph"), 
-                           package = "InPAS")
-   tags <- c("Baf3", "UM15")
-   metadata <- data.frame(tag = tags, 
-                          condition = c("Baf3", "UM15"),
-                          bedgraph_file = bedgraphs)
-   outdir = tempdir()
-   write.table(metadata, file =file.path(outdir, "metadata.txt"), 
-               sep = "\t", quote = FALSE, row.names = FALSE)
-   
-   sqlite_db <- setup_sqlitedb(metadata = file.path(outdir, 
-                                                    "metadata.txt"),
-                               outdir)
-   coverage <- list()
-   for (i in seq_along(bedgraphs)){
-   coverage[[tags[i]]] <- get_ssRleCov(bedgraph = bedgraphs[i],
-                            tag = tags[i],
-                            genome = genome,
-                            sqlite_db = sqlite_db,
-                            outdir = outdir,
-                            removeScaffolds = TRUE,
-                            BPPARAM = NULL)
-   }
-   coverage_files <- assemble_allCov(sqlite_db, 
-                                    outdir, 
-                                    genome, 
-                                    removeScaffolds = FALSE)
-   run_coverageQC(sqlite_db, TxDb, edb, genome,
-                  removeScaffolds = TRUE,
-                  which = GRanges("chr6",
-                     ranges = IRanges(98013000, 140678000)))
+  library("BSgenome.Mmusculus.UCSC.mm10")
+  library("TxDb.Mmusculus.UCSC.mm10.knownGene")
+  library("EnsDb.Mmusculus.v79")
+
+  genome <- BSgenome.Mmusculus.UCSC.mm10
+  TxDb <- TxDb.Mmusculus.UCSC.mm10.knownGene
+  edb <- EnsDb.Mmusculus.v79
+
+  bedgraphs <- system.file("extdata", c(
+    "Baf3.extract.bedgraph",
+    "UM15.extract.bedgraph"
+  ),
+  package = "InPAS"
+  )
+  tags <- c("Baf3", "UM15")
+  metadata <- data.frame(
+    tag = tags,
+    condition = c("Baf3", "UM15"),
+    bedgraph_file = bedgraphs
+  )
+  outdir <- tempdir()
+  write.table(metadata,
+    file = file.path(outdir, "metadata.txt"),
+    sep = "\t", quote = FALSE, row.names = FALSE
+  )
+
+  sqlite_db <- setup_sqlitedb(
+    metadata = file.path(
+      outdir,
+      "metadata.txt"
+    ),
+    outdir
+  )
+  tx <- parse_TxDb(
+    sqlite_db = sqlite_db,
+    TxDb = TxDb,
+    edb = edb,
+    genome = genome,
+    outdir = outdir,
+    chr2exclude = "chrM"
+  )
+  addLockName(filename = tempfile())
+  coverage <- list()
+  for (i in seq_along(bedgraphs)) {
+    coverage[[tags[i]]] <- get_ssRleCov(
+      bedgraph = bedgraphs[i],
+      tag = tags[i],
+      genome = genome,
+      sqlite_db = sqlite_db,
+      outdir = outdir,
+      chr2exclude = "chrM"
+    )
+  }
+  chr_coverage <- assemble_allCov(sqlite_db,
+    seqname = "chr6",
+    outdir,
+    genome
+  )
+  run_coverageQC(sqlite_db, TxDb, edb, genome,
+    chr2exclude = "chrM",
+    which = GRanges("chr6",
+      ranges = IRanges(98013000, 140678000)
+    )
+  )
 }
 }
 \author{

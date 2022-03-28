@@ -4,11 +4,11 @@
 \alias{get_depthWeight}
 \title{Calculate the depth weight for each sample or each experimental condition}
 \usage{
-get_depthWeight(sqlite_db, hugeData)
+get_depthWeight(metadata, hugeData)
 }
 \arguments{
-\item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
-\code{\link[=setup_sqlitedb]{setup_sqlitedb()}}.}
+\item{metadata}{A data frame containing the metadata for a RNA-seq experiment,
+which can be extract from the SQLite database set up by \code{\link[=setup_sqlitedb]{setup_sqlitedb()}}}
 
 \item{hugeData}{A logical(1), indicating whether it is huge data}
 }

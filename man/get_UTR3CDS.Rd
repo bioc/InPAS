@@ -4,7 +4,12 @@
 \alias{get_UTR3CDS}
 \title{Get 3' UTRs and their last CDS regions based on CP sites}
 \usage{
-get_UTR3CDS(sqlite_db, chr.utr3, BPPARAM = NULL)
+get_UTR3CDS(
+  sqlite_db,
+  chr.utr3,
+  outdir = getInPASOutputDirectory(),
+  min.length.diff = 200
+)
 }
 \arguments{
 \item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
@@ -14,10 +19,12 @@ setup_sqlitedb().}
 GRanges for a chromosome. It must be one element of an output of
 \code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}}.}
 
-\item{BPPARAM}{an optional \link[BiocParallel:BiocParallelParam-class]{BiocParallel::BiocParallelParam} instance
-determining the parallel back-end to be used during evaluation, or a list
-of BiocParallelParam instances, to be applied in sequence for nested calls
-to bplapply. It can be set to NULL or bpparam()}
+\item{outdir}{A character(1) vector, a path with write permission for storing
+InPAS analysis results. If it doesn't exist, it will be created.}
+
+\item{min.length.diff}{An integer(1) vector, specifying minimal length
+difference between proximal and distal APA sites which should be met to be
+considered for differential APA analysis. Default is 200 bp.}
 }
 \value{
 An object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges} containing GRanges for

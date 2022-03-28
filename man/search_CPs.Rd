@@ -7,29 +7,32 @@
 search_CPs(
   seqname,
   sqlite_db,
-  utr3,
-  background,
-  z2s,
-  depth.weight,
-  genome,
+  genome = getInPASGenome(),
   MINSIZE = 10,
-  window_size = 100,
-  search_point_START = 50,
+  window_size = 200,
+  search_point_START = 100,
   search_point_END = NA,
-  cutStart = 10,
-  cutEnd = 0,
-  adjust_distal_polyA_end = TRUE,
-  coverage_threshold = 5,
+  cutEnd = NA,
+  filter.last = TRUE,
+  adjust_distal_polyA_end = FALSE,
   long_coverage_threshold = 2,
   PolyA_PWM = NA,
   classifier = NA,
   classifier_cutoff = 0.8,
-  shift_range = window_size,
-  step = 1,
-  two_way = FALSE,
-  hugeData = TRUE,
-  outdir,
-  silence = FALSE
+  shift_range = 100,
+  step = 2,
+  outdir = getInPASOutputDirectory(),
+  silence = FALSE,
+  cluster_type = c("interactive", "multicore", "torque", "slurm", "sge", "lsf",
+    "openlava", "socket"),
+  template_file = NULL,
+  mc.cores = 1,
+  future.chunk.size = 50,
+  resources = list(walltime = 3600 * 8, ncpus = 4, mpp = 1024 * 4, queue = "long",
+    memory = 4 * 4 * 1024),
+  DIST2ANNOAPAP = 500,
+  DIST2END = 1000,
+  output.all = FALSE
 )
 }
 \arguments{
@@ -38,26 +41,13 @@ search_CPs(
 \item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
 \code{\link[=setup_sqlitedb]{setup_sqlitedb()}}.}
 
-\item{utr3}{An object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges}. Output of \code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}} for a chromosome/scaffold}
-
-\item{background}{A character(1) vector, the range for calculating cutoff
-threshold of local background. It can be "same_as_long_coverage_threshold",
-"1K", "5K","10K", or "50K".}
-
-\item{z2s}{one element of an output of \code{\link[=setup_CPsSearch]{setup_CPsSearch()}} for Z-score cutoff
-values, which is the output of \code{\link[=get_zScoreCutoff]{get_zScoreCutoff()}}}
-
-\item{depth.weight}{A named vector. One element of an output of
-\code{\link[=setup_CPsSearch]{setup_CPsSearch()}} for coverage depth weight, which is the output of
-\code{\link[=get_depthWeight]{get_depthWeight()}}}
-
 \item{genome}{A \link[BSgenome:BSgenome-class]{BSgenome::BSgenome} object}
 
 \item{MINSIZE}{A integer(1) vector, specifying the minimal length in bp of a
 short/proximal 3' UTR. Default, 10}
 
 \item{window_size}{An integer(1) vector, the window size for novel distal or
-proximal CP site searching. default: 100.}
+proximal CP site searching. default: 200.}
 
 \item{search_point_START}{A integer(1) vector, starting point relative to
 the 5' extremity of 3' UTRs for searching for proximal CP sites}
@@ -65,24 +55,18 @@ the 5' extremity of 3' UTRs for searching for proximal CP sites}
 \item{search_point_END}{A integer(1) vector, ending point relative to the 3'
 extremity of 3' UTRs for searching for proximal CP sites}
 
-\item{cutStart}{An integer(1) vector a numeric(1) vector. What percentage or
-how many nucleotides should be removed from 5' extremities before searching
-for CP sites? It can be a decimal between 0, and 1, or an integer greater
-than 1. 0.1 means 10 percent, 25 means cut first 25 bases}
-
 \item{cutEnd}{An integer(1) vector a numeric(1) vector. What percentage or
 how many nucleotides should be removed from 5' extremities before searching
-for CP sites? It can be a decimal between 0, and 1, or an integer greater
-than 1. 0.1 means 10 percent, 25 means cut first 25 bases}
+for proximal CP sites? It can be a decimal between 0, and 1, or an integer
+greater than 1. 0.1 means 10 percent, 25 means cut first 25 bases}
+
+\item{filter.last}{A logical(1), whether to filter out the last valley, which
+is likely the 3' end of the longer 3' UTR if no novel distal CP site is
+detected and the 3' end excluded by setting cutEnd/search_point_END is small.}
 
 \item{adjust_distal_polyA_end}{A logical(1) vector. If true, distal CP sites
 are subject to adjustment by the Naive Bayes classifier from the
 \link[cleanUpdTSeq:cleanUpdTSeq]{cleanUpdTSeq::cleanUpdTSeq-package}}
-
-\item{coverage_threshold}{An integer(1) vector, specifying the cutoff
-threshold of coverage for first 100 nucleotides. If the coverage of first
-100 nucleotides is lower than coverage_threshold, that transcript will be
-not considered for further analysis. Default, 5.}
 
 \item{long_coverage_threshold}{An integer(1) vector, specifying the cutoff
 threshold of coverage for the terminal of long form 3' UTRs. If the coverage
@@ -100,7 +84,7 @@ site is classified as true CP sites. The value should be between 0.5 and 1.
 Default, 0.8.}
 
 \item{shift_range}{An integer(1) vector, specifying a shift range for
-adjusting the proximal and distal CP sites. Default, 100. It determines the
+adjusting the proximal and distal CP sites. Default, 50. It determines the
 range flanking the candidate CP sites to search the most likely real
 CP sites.}
 
@@ -108,103 +92,147 @@ CP sites.}
 the proximal or distal CP sites using the Naive Bayes classifier from the
 cleanUpdTSeq package. Default 1. It can be in the range of 1 to 10.}
 
-\item{two_way}{A logical (1), indicating whether the proximal CP sites are
-searched from both directions or not.}
-
-\item{hugeData}{A logical(1), indicating whether it is huge data}
-
 \item{outdir}{A character(1) vector, a path with write permission for storing
 the CP sites. If it doesn't exist, it will be created.}
 
-\item{silence}{logical(1), indicating whether progress is reported or not. By
-default, FALSE}
+\item{silence}{A logical(1), indicating whether progress is reported or not.
+By default, FALSE}
+
+\item{cluster_type}{A character (1) vector, indicating the type of cluster
+job management systems. Options are "interactive","multicore", "torque",
+"slurm", "sge", "lsf", "openlava", and "socket". see
+\href{https://mllg.github.io/batchtools/articles/batchtools.html}{batchtools vignette}}
+
+\item{template_file}{A charcter(1) vector, indicating the template file for
+job submitting scripts when cluster_type is set to "torque", "slurm",
+"sge", "lsf", or "openlava".}
+
+\item{mc.cores}{An integer(1), number of cores for making multicore clusters
+or socket clusters using \pkg{batchtools}, and for \code{\link[parallel:mclapply]{parallel::mclapply()}}}
+
+\item{future.chunk.size}{The average number of elements per future
+("chunk"). If Inf, then all elements are processed in a single future.
+If NULL, then argument future.scheduling = 1 is used by default. Users can
+set future.chunk.size = total number of elements/number of cores set for
+the backend. See the future.apply package for details. Default, 50. This
+parameter is used to split the candidate 3' UTRs for alternative SP sites
+search.}
+
+\item{resources}{A named list specifying the computing resources when
+cluster_type is set to "torque", "slurm", "sge", "lsf", or "openlava". See
+\href{https://mllg.github.io/batchtools/articles/batchtools.html}{batchtools vignette}}
+
+\item{DIST2ANNOAPAP}{An integer, specifying a cutoff for annotate MSE valleys
+with known proximal APAs in a given downstream distance. Default is 500.}
+
+\item{DIST2END}{An integer, specifying a cutoff of the distance between last
+valley and the end of the 3' UTR (where MSE of the last base is calculated).
+If the last valley is closer to the end than the specified distance, it will
+not be considered because it is very likely due to RNA coverage decay at the
+end of mRNA. Default is 1200. User can consider a value between 1000 and
+1500, depending on the library preparation procedures: RNA fragmentation and
+size selection.}
+
+\item{output.all}{A logical(1), indicating whether to output entries with only
+single CP site for a 3' UTR. Default, FALSE.}
 }
 \value{
 An object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges} containing distal and
-proximal CP site information for each 3' UTR
+proximal CP site information for each 3' UTR if detected.
 }
 \description{
 Estimate the CP sites for UTRs on a given chromosome
 }
 \examples{
 if (interactive()) {
-   library(BSgenome.Mmusculus.UCSC.mm10)
-   library(TxDb.Mmusculus.UCSC.mm10.knownGene)
-   genome <- BSgenome.Mmusculus.UCSC.mm10
-   TxDb <- TxDb.Mmusculus.UCSC.mm10.knownGene
-   
-   ## load UTR3 annotation and convert it into a GRangesList
-   data(utr3.mm10)
-   utr3 <- split(utr3.mm10, seqnames(utr3.mm10))
-   
-   bedgraphs <- system.file("extdata",c("Baf3.extract.bedgraph",
-                                        "UM15.extract.bedgraph"), 
-                           package = "InPAS")
-   tags <- c("Baf3", "UM15")
-   metadata <- data.frame(tag = tags, 
-                          condition = c("Baf3", "UM15"),
-                          bedgraph_file = bedgraphs)
-   outdir = tempdir()
-   write.table(metadata, file =file.path(outdir, "metadata.txt"), 
-               sep = "\t", quote = FALSE, row.names = FALSE)
-   
-   sqlite_db <- setup_sqlitedb(metadata = file.path(outdir, 
-                                         "metadata.txt"), outdir)
-   coverage <- list()
-   for (i in seq_along(bedgraphs)) {
-   coverage[[tags[i]]] <- get_ssRleCov(bedgraph = bedgraphs[i],
-                            tag = tags[i],
-                            genome = genome,
-                            sqlite_db = sqlite_db,
-                            outdir = outdir,
-                            removeScaffolds = TRUE,
-                            BPPARAM = NULL)}
-   coverage_files <- assemble_allCov(sqlite_db, 
-                                    outdir, 
-                                    genome, 
-                                    removeScaffolds = TRUE)
-   data4CPsSearch <- setup_CPsSearch(sqlite_db,
-                                     genome,
-                                     utr3,
-                                     background = "10K",
-                                     TxDb = TxDb,
-                                     removeScaffolds = TRUE,
-                                     BPPARAM = NULL,
-                                     hugeData = TRUE,
-                                     outdir = outdir)
-   ## polyA_PWM
-   load(system.file("extdata", "polyA.rda", package = "InPAS"))
-   
-   ## load the Naive Bayes classifier model from the cleanUpdTSeq package
-   library(cleanUpdTSeq)
-   data(classifier)
-   
-   CPs <- search_CPs(seqname = "chr6",
-                     sqlite_db = sqlite_db, 
-                     utr3 = utr3,
-                     background = data4CPsSearch$background, 
-                     z2s = data4CPsSearch$z2s,
-                     depth.weight = data4CPsSearch$depth.weight,
-                     genome = genome, 
-                     MINSIZE = 10, 
-                     window_size = 100,
-                     search_point_START =50,
-                     search_point_END = NA,
-                     cutStart = 10, 
-                     cutEnd = 0,
-                     adjust_distal_polyA_end = TRUE,
-                     coverage_threshold = 5,
-                     long_coverage_threshold = 2,
-                     PolyA_PWM = pwm, 
-                     classifier = classifier,
-                     classifier_cutoff = 0.8,
-                     shift_range = 100,
-                     step = 5,
-                     two_way = FALSE,
-                     hugeData = TRUE,
-                     outdir = outdir)
-}
+  library(BSgenome.Mmusculus.UCSC.mm10)
+  library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+  genome <- BSgenome.Mmusculus.UCSC.mm10
+  TxDb <- TxDb.Mmusculus.UCSC.mm10.knownGene
 
+  ## load UTR3 annotation and convert it into a GRangesList
+  data(utr3.mm10)
+  utr3 <- split(utr3.mm10, seqnames(utr3.mm10), drop = TRUE)
+
+  bedgraphs <- system.file("extdata", c(
+    "Baf3.extract.bedgraph",
+    "UM15.extract.bedgraph"
+  ),
+  package = "InPAS"
+  )
+  tags <- c("Baf3", "UM15")
+  metadata <- data.frame(
+    tag = tags,
+    condition = c("Baf3", "UM15"),
+    bedgraph_file = bedgraphs
+  )
+  outdir <- tempdir()
+  write.table(metadata,
+    file = file.path(outdir, "metadata.txt"),
+    sep = "\t", quote = FALSE, row.names = FALSE
+  )
+
+  sqlite_db <- setup_sqlitedb(metadata = file.path(
+    outdir,
+    "metadata.txt"
+  ), outdir)
+  addLockName(filename = tempfile())
+  coverage <- list()
+  for (i in seq_along(bedgraphs)) {
+    coverage[[tags[i]]] <- get_ssRleCov(
+      bedgraph = bedgraphs[i],
+      tag = tags[i],
+      genome = genome,
+      sqlite_db = sqlite_db,
+      outdir = outdir,
+      chr2exclude = "chrM"
+    )
+  }
+  data4CPsSearch <- setup_CPsSearch(sqlite_db,
+    genome,
+    chr.utr3 = utr3[["chr6"]],
+    seqname = "chr6",
+    background = "10K",
+    TxDb = TxDb,
+    hugeData = TRUE,
+    outdir = outdir,
+    minZ = 2,
+    cutStart = 10,
+    MINSIZE = 10,
+    coverage_threshold = 5
+  )
+  ## polyA_PWM
+  load(system.file("extdata", "polyA.rda", package = "InPAS"))
+
+  ## load the Naive Bayes classifier model from the cleanUpdTSeq package
+  library(cleanUpdTSeq)
+  data(classifier)
+  ## the following setting just for demo.
+  if (.Platform$OS.type == "window") {
+    plan(multisession)
+  } else {
+    plan(multicore)
+  }
+  CPs <- search_CPs(
+    seqname = "chr6",
+    sqlite_db = sqlite_db,
+    genome = genome,
+    MINSIZE = 10,
+    window_size = 100,
+    search_point_START = 50,
+    search_point_END = NA,
+    cutEnd = 0,
+    filter.last = TRUE,
+    adjust_distal_polyA_end = TRUE,
+    long_coverage_threshold = 2,
+    PolyA_PWM = pwm,
+    classifier = classifier,
+    classifier_cutoff = 0.8,
+    shift_range = 100,
+    step = 5,
+    outdir = outdir
+  )
+}
 }
 \seealso{
 \code{\link[=search_proximalCPs]{search_proximalCPs()}}, \code{\link[=adjust_proximalCPs]{adjust_proximalCPs()}},

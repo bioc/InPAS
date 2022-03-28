@@ -6,19 +6,26 @@
 \usage{
 test_dPDUI(
   eset,
+  sqlite_db,
+  outdir = getInPASOutputDirectory(),
   method = c("limma", "fisher.exact", "singleSample", "singleGroup"),
   normalize = c("none", "quantiles", "quantiles.robust", "mean", "median"),
   design,
   contrast.matrix,
   coef = 1,
   robust = FALSE,
-  ...,
-  sqlite_db
+  ...
 )
 }
 \arguments{
 \item{eset}{An object of \linkS4class{UTR3eSet}. It is an output of
 \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}}
+
+\item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
+setup_sqlitedb().}
+
+\item{outdir}{A character(1) vector, a path with write permission for storing
+InPAS analysis results. If it doesn't exist, it will be created.}
 
 \item{method}{A character(1), indicating the method for testing dPDUI. It can
 be "limma", "fisher.exact", "singleSample", or "singleGroup"}
@@ -40,13 +47,10 @@ limma-based analysis.}
 contrast of the linear model is of interest. see more \code{\link[limma:toptable]{limma::topTable()}}.
 default value: 1}
 
-\item{robust}{logical, should the estimation of the empirical Bayes prior
-parameters be robustified against outlier sample variances?}
+\item{robust}{A logical(1) vector, indicating whether the estimation of the empirical Bayes prior
+parameters should be robustified against outlier sample variances.}
 
 \item{...}{other arguments are passed to lmFit}
-
-\item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
-setup_sqlitedb().}
 }
 \value{
 An object of \linkS4class{UTR3eSet}, with the last element \code{testRes} containing the test results in a matrix.
@@ -66,13 +70,18 @@ tags <- colnames(eset@PDUI)
 g <- factor(gsub("\\\\..*$", "", tags))
 design <- model.matrix(~ -1 + g)
 colnames(design) <- c("Brain", "UHR")
-contrast.matrix <- makeContrasts(contrasts = "Brain-UHR", 
-                                 levels = design)
-res <- test_dPDUI(eset = eset,
-                  method = "limma",
-                  normalize = "none",
-                  design = design,
-                  contrast.matrix = contrast.matrix)
+contrast.matrix <- makeContrasts(
+  contrasts = "Brain-UHR",
+  levels = design
+)
+res <- test_dPDUI(
+  eset = eset,
+  sqlite_db,
+  method = "limma",
+  normalize = "none",
+  design = design,
+  contrast.matrix = contrast.matrix
+)
 }
 \seealso{
 \code{\link[=run_singleSampleAnalysis]{run_singleSampleAnalysis()}}, \code{\link[=run_singleGroupAnalysis]{run_singleGroupAnalysis()}},

@@ -25,13 +25,13 @@ Objects can be created by calls of the form \code{new("UTR3eSet", ...)}
 \section{Slots}{
 
 \describe{
-\item{\code{usage}:}{Object of class \code{"GRanges"}}
-\item{\code{PDUI}:}{Object of class \code{"matrix"}}
-\item{\code{PDUI.log2}:}{Object of class \code{"matrix"}}
-\item{\code{short}:}{Object of class \code{"matrix"}}
-\item{\code{long}:}{Object of class \code{"matrix"}}
-\item{\code{signals}:}{Object of class \code{"list"}}
-\item{\code{testRes}:}{Object of class \code{"matrix"}}
+\item{\code{usage}}{Object of class \code{"GRanges"}}
+\item{\code{PDUI}}{Object of class \code{"matrix"}}
+\item{\code{PDUI.log2}}{Object of class \code{"matrix"}}
+\item{\code{short}}{Object of class \code{"matrix"}}
+\item{\code{long}}{Object of class \code{"matrix"}}
+\item{\code{signals}}{Object of class \code{"list"}}
+\item{\code{testRes}}{Object of class \code{"matrix"}}
 }
 }
 

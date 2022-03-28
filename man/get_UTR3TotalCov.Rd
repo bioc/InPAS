@@ -5,9 +5,8 @@
 \title{extract coverage of 3' UTR for CP sites prediction}
 \usage{
 get_UTR3TotalCov(
-  utr3,
-  totalCov,
-  BPPARAM = NULL,
+  chr.utr3,
+  chr.totalCov,
   gcCompensation = NA,
   mappabilityCompensation = NA,
   FFT = FALSE,
@@ -15,18 +14,11 @@ get_UTR3TotalCov(
 )
 }
 \arguments{
-\item{utr3}{An object of \link[GenomicRanges:GRangesList-class]{GenomicRanges::GRangesList}. It must be the
-output of \code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}}}
+\item{chr.utr3}{An object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges}. It must be an
+element of the output of \code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}} for a given chromosome.}
 
-\item{totalCov}{total coverage for each sample. It must be a list of the
-output of \code{\link[=get_totalCov]{get_totalCov()}}}
-
-\item{BPPARAM}{an optional \link[BiocParallel:BiocParallelParam-class]{BiocParallel::BiocParallelParam} instance
-determining the parallel back-end to be used during evaluation, or a list
-of BiocParallelParam instances, to be applied in sequence for nested calls
-to bplapply. It can be set to NULL or bpparam()}
-
-\item{gcCompensation}{GC compensation vector. Not support yet.}
+\item{chr.totalCov}{total coverage for each condition of a given chromosome. It
+must be an output of \code{\link[=get_totalCov]{get_totalCov()}}}
 
 \item{mappabilityCompensation}{mappability compensation vector. Not support
 yet.}
@@ -34,20 +26,12 @@ yet.}
 \item{FFT}{Use FFT smooth or not.}
 
 \item{fft.sm.power}{the cut-off frequency of FFT smooth.}
+
+\item{gcCompensationensation}{GC compensation vector. Not support yet.}
 }
 \value{
-A list containing total coverage for each 3' UTR.
-\describe{
-\item{seqname}{chromosome/scaffold name}
-\describe{
-\item{transcript1}{data matrix containing summarized View
-for transcript1}
-\item{transcript2}{data matrix containing summarized View
-for transcript2}
-\item{transcriptN}{data matrix containing summarized View
-for transcriptN}
-}
-}
+path to a file storing the UTR3 total coverage for a given
+chromosome/scaffold
 }
 \description{
 extract 3' UTR coverage from totalCov according to the

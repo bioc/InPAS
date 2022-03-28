@@ -4,33 +4,40 @@
 \alias{get_totalCov}
 \title{Calculate the total coverage}
 \usage{
-get_totalCov(sqlite_db, seqname, hugeData)
+get_totalCov(sqlite_db, chr.cov, seqname, metadata, outdir, hugeData)
 }
 \arguments{
 \item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
 \code{\link[=setup_sqlitedb]{setup_sqlitedb()}}.}
 
+\item{chr.cov}{A list of Rle objects storing coverage per sample for a given
+chromosome/scaffold}
+
 \item{seqname}{A character(1), the chromosome/scaffold name}
+
+\item{metadata}{A data frame containing the metadata for a RNA-seq experiment,
+which can be extract from the SQLite database set up by \code{\link[=setup_sqlitedb]{setup_sqlitedb()}}}
+
+\item{outdir}{A character(1) vector, a path with write permission for storing
+InPAS analysis results. If it doesn't exist, it will be created.}
 
 \item{hugeData}{A logical(1), indicating whether it is huge data}
 }
 \value{
-A list containing coverage data. For hugeData, coverage of samples
-in each condition is merged chromosome by chromosome. For non-hugeData,
-per-chromosome coverage of all samples are returned.
+A list containing pooled coverage data. For hugeData, coverage of
+samples under each condition is merged chromosome by chromosome.
+For non-hugeData, per-chromosome coverage of all samples are returned.
 \describe{
 \item{seqname}{chromosome/scaffold name}
 \describe{
-\item{tag1}{name tag for sample1}
-\item{tag2}{name tag for sample2}
-\item{tagN}{name tag for sampleN}
+\item{condition1}{condition name 1}
+\item{condition1}{condition name 2}
 }
 }
 }
 \description{
 For hugeData, coverage of samples in each condition is merged chromosome
 by chromosome. For non-hugeData, per-chromosome coverage of all samples
-are returned.
 }
 \author{
 Haibo Liu, Jianhong Ou

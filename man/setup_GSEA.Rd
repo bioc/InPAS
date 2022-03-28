@@ -7,7 +7,7 @@
 setup_GSEA(
   eset,
   groupList,
-  outdir,
+  outdir = getInPASOutputDirectory(),
   preranked = TRUE,
   rankBy = c("logFC", "P.value"),
   rnkFilename = "InPAS.rnk",
@@ -24,7 +24,7 @@ the list's name, such as list(groupA = c("sample_1", "sample_2",
 "sample_3"), groupB = c("sample_4", "sample_5", "sample_6"))}
 
 \item{outdir}{A character(1) vector, a path with write permission for storing
-the files for GSEA analysis. If it doesn't exist, it will be created.}
+InPAS analysis results. If it doesn't exist, it will be created.}
 
 \item{preranked}{A logical(1) vector, out preranked or not}
 
@@ -48,18 +48,33 @@ output the log2 transformed delta PDUI txt file, chip file, rank file and
 phynotype label file for GSEA analysis
 }
 \examples{
-if (interactive()) {
-  file <- system.file("extdata", "eset.MAQC.rda", package = "InPAS")
-  load(file)
-  gp1 <- c("Brain.auto", "Brain.phiX")
-  gp2 <- c("UHR.auto", "UHR.phiX")
-  groupList <- list(Brain = gp1, UHR = gp2)
-  prepare4GSEA(eset, 
-               groupList = groupList, 
-               outdir = tempdir(),
-               preranked = TRUE,
-               rankBy = "logFC")
-}
+library(limma)
+path <- system.file("extdata", package = "InPAS")
+load(file.path(path, "eset.MAQC.rda"))
+tags <- colnames(eset@PDUI)
+g <- factor(gsub("\\\\..*$", "", tags))
+design <- model.matrix(~ -1 + g)
+colnames(design) <- c("Brain", "UHR")
+contrast.matrix <- makeContrasts(
+  contrasts = "Brain-UHR",
+  levels = design
+)
+res <- test_dPDUI(
+  eset = eset,
+  method = "limma",
+  normalize = "none",
+  design = design,
+  contrast.matrix = contrast.matrix
+)
+gp1 <- c("Brain.auto", "Brain.phiX")
+gp2 <- c("UHR.auto", "UHR.phiX")
+groupList <- list(Brain = gp1, UHR = gp2)
+setup_GSEA(res,
+  groupList = groupList,
+  outdir = tempdir(),
+  preranked = TRUE,
+  rankBy = "P.value"
+)
 }
 \seealso{
 data formats for GSEA.

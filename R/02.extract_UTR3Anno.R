@@ -6,61 +6,138 @@
 #'
 #' @details A good practice is to perform read alignment using a reference
 #'   genome from Ensembl/GenCode including only the primary assembly and build a
-#'   TxDb using the GTF/GFF files downloaded from the same source as the
-#'   reference genome, such as BioMart/Ensembl/GenCode. For instruction, see
+#'   TxDb and EnsDb using the GTF/GFF files downloaded from the same source as
+#'   the reference genome, such as BioMart/Ensembl/GenCode. For instruction, see
 #'   Vignette of the GenomicFeatures. The UCSC reference genomes and their
-#'   annotation can be very cubersome.
+#'   annotation packages can be very cumbersome.
 #'
-#' @param TxDb an object of [GenomicFeatures::TxDb-class]
+#' @param sqlite_db A path to the SQLite database for InPAS, i.e. the output of
+#'   [setup_sqlitedb()].
+#' @param TxDb An object of [GenomicFeatures::TxDb-class]
 #' @param edb An object of [ensembldb::EnsDb-class]
-#' @param removeScaffolds A logical(1) vector, whether the scaffolds should be
-#'   removed from the genome If you use a TxDb containing alternative
-#'   scaffolds, you'd better to remove the scaffolds.
-#' @param MAX_EXONS_GAP An integer(1) vector, maximal gap sizes between last
-#'   known CP sites to downstream exons
+#' @param genome An object of [BSgenome::BSgenome-class]
+#' @param chr2exclude A character vector, NA or NULL, specifying chromosomes or
+#'   scaffolds to be excluded for InPAS analysis. `chrM` and alternative scaffolds
+#'   representing different haplotypes should be excluded.
+#' @param outdir A character(1) vector, a path with write permission for storing
+#'   InPAS analysis results. If it doesn't exist, it will be created.
+#' @param MAX_EXONS_GAP An integer(1) vector, maximal gap sizes between the last
+#'   known CP sites to a nearest downstream exon. Default is 10 kb for mammalian
+#'   genomes. For other species, user need to adjust this parameter.
 #' @import GenomicRanges
 #' @importFrom IRanges IRanges
-#' @importFrom plyranges as_granges complement_ranges disjoin_ranges filter group_by mutate reduce_ranges reduce_ranges_directed remove_names select set_genome_info shift_downstream summarise
+#' @importFrom plyranges as_granges complement_ranges disjoin_ranges filter
+#' group_by mutate reduce_ranges reduce_ranges_directed remove_names select
+#' set_genome_info shift_downstream summarise
 #' @importFrom dplyr as_tibble mutate filter arrange bind_rows group_by
 #'   left_join summarise n
 #'
 #' @author Jianhong Ou, Haibo Liu
 #' @return An object of [GenomicRanges::GRangesList], containing GRanges for
-#'   extracted 3' UTRs, and the corresponding last CDSs and next.exon.gap for 
-#'   each chromosome/scaffold.
+#'   extracted 3' UTRs, and the corresponding last CDSs and next.exon.gap for
+#'   each chromosome/scaffold. Chromosome
 #'
 #' @export
 #'
 #' @examples
 #' library("EnsDb.Hsapiens.v86")
+#' library("BSgenome.Hsapiens.UCSC.hg19")
 #' library("GenomicFeatures")
+#' ## set a sqlite database
+#' bedgraphs <- system.file("extdata", c(
+#'   "Baf3.extract.bedgraph",
+#'   "UM15.extract.bedgraph"
+#' ),
+#' package = "InPAS"
+#' )
+#' tags <- c("Baf3", "UM15")
+#' metadata <- data.frame(
+#'   tag = tags,
+#'   condition = c("Baf3", "UM15"),
+#'   bedgraph_file = bedgraphs
+#' )
+#' outdir <- tempdir()
+#'
+#' write.table(metadata,
+#'   file = file.path(outdir, "metadata.txt"),
+#'   sep = "\t", quote = FALSE, row.names = FALSE
+#' )
+#' sqlite_db <- setup_sqlitedb(
+#'   metadata =
+#'     file.path(outdir, "metadata.txt"),
+#'   outdir
+#' )
+#'
 #' samplefile <- system.file("extdata",
-#'                           "hg19_knownGene_sample.sqlite",
-#'                            package = "GenomicFeatures")
+#'   "hg19_knownGene_sample.sqlite",
+#'   package = "GenomicFeatures"
+#' )
 #' TxDb <- loadDb(samplefile)
 #' edb <- EnsDb.Hsapiens.v86
-#' utr3 <- extract_UTR3Anno(TxDb, edb,
-#'                  removeScaffolds = TRUE,
-#'                  MAX_EXONS_GAP = 10000)
-
-extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
-                           removeScaffolds = FALSE,
-                           MAX_EXONS_GAP = 10000) {
-  if (is.null(TxDb) || !is(TxDb, "TxDb")) {
+#' genome <- BSgenome.Hsapiens.UCSC.hg19
+#' addInPASOutputDirectory(outdir)
+#' seqnames <- seqnames(BSgenome.Hsapiens.UCSC.hg19)
+#' chr2exclude <- c(
+#'   "chrM", "chrMT",
+#'   seqnames[grepl("_(hap\\d+|fix|alt)$",
+#'     seqnames,
+#'     perl = TRUE
+#'   )]
+#' )
+#' utr3 <- extract_UTR3Anno(sqlite_db, TxDb, edb,
+#'   genome = genome,
+#'   chr2exclude = chr2exclude,
+#'   outdir = tempdir(),
+#'   MAX_EXONS_GAP = 10000L
+#' )
+extract_UTR3Anno <- function(sqlite_db,
+                             TxDb = getInPASTxDb(),
+                             edb = getInPASEnsDb(),
+                             genome = getInPASGenome(),
+                             outdir = getInPASOutputDirectory(),
+                             chr2exclude = getChr2Exclude(),
+                             MAX_EXONS_GAP = 10000L) {
+  if (missing(sqlite_db) || length(sqlite_db) != 1 ||
+    !file.exists(sqlite_db)) {
+    stop("sqlite_db, a path to the SQLite database is required!")
+  }
+  if (!is(TxDb, "TxDb")) {
     stop("TxDb is required and must be an object of GenomicFeatures::TxDb-class!")
   }
-  if (is.null(edb) || !is(edb, "EnsDb")) {
+  if (!is(genome, "BSgenome")) {
+    stop("genome must be an object of BSgenome")
+  }
+  if (!is(edb, "EnsDb")) {
     stop("edb is required and must be an object of ensembldb::EnsDb-class!")
   }
-
-  tx <- parse_TxDb(TxDb, edb, removeScaffolds = removeScaffolds)
-  ## extract utr3 sharing same start positions from same gene
-  if (any(is.na(tx$gene) | tx$gene == "")) {
-    stop("unexpected things happend at checking gene IDs", 
-         " gene should not contain NA or empty strings")
+  if (!is.null(chr2exclude) && !is.character(chr2exclude)) {
+    stop("chr2Exclude must be NULL or a character vector")
+  }
+  if (!is.character(outdir) || length(outdir) != 1) {
+    stop("outdir is required!")
+  }
+  if (!dir.exists(outdir)) {
+    dir.create(outdir, recursive = TRUE)
+  }
+  if (!is.integer(MAX_EXONS_GAP) || MAX_EXONS_GAP < 1) {
+    stop("MAX_EXONS_GAP must be an positive integer")
   }
 
-  
+  tx <- parse_TxDb(sqlite_db,
+    TxDb, edb,
+    genome = genome,
+    chr2exclude = chr2exclude,
+    outdir = outdir
+  )
+  ## extract utr3 sharing same start positions from same gene
+  if (any(is.na(tx$gene)) || any(tx$gene == "")) {
+    stop(
+      "unexpected things happend at checking gene IDs",
+      "\ngene should not contain NA or empty strings"
+    )
+  }
+
+  # mono-exon ncRNA is not used for InPAS analysis
   utr3 <- tx %>%
     plyranges::filter(feature != "ncRNA" &
       feature %in% c("utr3", "lastutr3")) %>%
@@ -85,15 +162,11 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
 
   ## mask 5UTR-CDS and any other region from last 3UTR
   # non.utr3 <- getRange(exons.not.utr3.last, "transcript") %>%
-  #    plyranges::filter(width < 1000) ##why 10000? because some gene is unbelivable huge.
+  #    plyranges::filter(width < 1000) ##why 1000? because some gene is unbelievable huge.
   # non.utr3 <- reduce(c(non.utr3, reduce(exons.not.utr3.last)))
   non.utr3 <- reduce(exons.not.utr3.last)
 
   removeMask <- function(gr, mask) {
-    # mask is already reduced
-    # mask.reduce <- reduce(mask)
-    mask <- non.utr3
-    gr <- utr3.last.block
     ol.mask <- findOverlaps(mask, gr,
       ignore.strand = TRUE, minoverlap = 1
     )
@@ -115,7 +188,7 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
       start(gr.ol)[gr.ol$rel == "left"] <-
         end(mask.ol)[gr.ol$rel == "left"] + 1
 
-      # mask in bewteen gr
+      # mask in between gr
       start(gr.ol)[gr.ol$rel == "ol" &
         as.character(strand(gr.ol)) == "+"] <-
         end(mask.ol)[gr.ol$rel == "ol" &
@@ -135,7 +208,6 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
           gr.ol$exon[duplicated(gr.ol$exon)]]
         exons.dup <- split(exons.dup, exons.dup$exon)
         exons.dup <- lapply(exons.dup, function(.ele) {
-          # .ele <- exons.dup[["chr1|ENST00000667728.1_2|lastutr3"]]
           ## get disjoined parts
           .disj <- disjoin(.ele)
           .cnt <- countOverlaps(.disj, .ele)
@@ -197,7 +269,7 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
 
   #####################################################################
   #      Collapsing last UTRs of the same start/end coordinates       #
-  #                on the +/- strand, respective per gene             #
+  #                on the +/- strand, respectively, per gene          #
   #####################################################################
 
   collapse_same_start_utr <- function(gr) {
@@ -300,124 +372,111 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
   #####################################################################
   utr3.last_reduced <- reduce(utr3.last, ignore.strand = FALSE)
   count_overlap <- countOverlaps(utr3.last_reduced, utr3.last)
-  utr3.last_reduced <- utr3.last_reduced[count_overlap > 1]
 
-  utr3.last_ol <- GenomicRanges::findOverlaps(utr3.last_reduced,
-    utr3.last,
-    ignore.strand = TRUE, minoverlap = 1
-  )
-  # non-overlapping utr3
-  utr3.last_isolated <- utr3.last[-unique(subjectHits(utr3.last_ol))]
+  if (sum(count_overlap > 1) > 0) {
+    utr3.last_reduced <- utr3.last_reduced[count_overlap > 1]
 
-  # split overlapping utr3.last of the same genes into
-  # compatible segaments for coverage calculation
-  # !!! overlapping utr3.last of different genes are removed
-  uniq_pairs <- data.frame(utr3.last_ol)
+    utr3.last_ol <- GenomicRanges::findOverlaps(utr3.last_reduced,
+      utr3.last,
+      ignore.strand = TRUE, minoverlap = 1
+    )
+    # non-overlapping utr3
+    utr3.last_isolated <- utr3.last[-unique(subjectHits(utr3.last_ol))]
 
-  uniq_pairs <- split(uniq_pairs[, 2], uniq_pairs[1])
-  utr3.last_overlap_split <- lapply(uniq_pairs, function(.x) {
-    gr <- utr3.last[.x]
-    if (length(unique(gr$gene)) > 1) {
-      gr <- NULL
-    } else {
-      gr_reduced <- reduce(gr)
+    # split overlapping utr3.last of the same genes into
+    # compatible segments for coverage calculation
+    # !!! overlapping utr3.last of different genes are removed
+    uniq_pairs <- data.frame(utr3.last_ol)
 
-      strand <- strand(gr_reduced)
-      feature <- gr$feature[1]
-      gene <- gr$gene[1]
-      symbol <- gr$symbol[1]
-
-      if (as.character(strand(gr_reduced)) == "+") {
-        gr <- gr[order(start(gr))]
-        st <- start(gr)
-        segment_start <- st
-        segment_end <- c(st[-1] - 1, end(gr_reduced))
-        end_sort <- gr[order(-end(gr))]
-        transcript <- gr$transcript
-        exon <- gr$exon
-        exon_rank <- gr$exon_rank
-        truncated <- c(
-          rep(TRUE, length(st) - 1),
-          end_sort$truncated[1]
-        )
-        CP <- grep("^proximalCP_", gr$annotatedProximalCP,
-          perl = TRUE, value = TRUE
-        )
-        if (length(CP) >= 1) {
-          CP <- gsub(
-            "_proximalCP", "",
-            paste(CP, collapse = "_")
-          )
-          CP <- paste(CP, paste(end(end_sort)[-1],
-            collapse = "_"
-          ),
-          sep = "_"
-          )
-        } else {
-          CP <- paste("proximalCP", paste(end(end_sort)[-1],
-            collapse = "_"
-          ),
-          sep = "_"
-          )
-        }
+    uniq_pairs <- split(uniq_pairs[, 2], uniq_pairs[1])
+    utr3.last_overlap_split <- lapply(uniq_pairs, function(.x) {
+      gr <- utr3.last[.x]
+      if (length(unique(gr$gene)) > 1) {
+        gr <- NULL
       } else {
-        gr <- gr[order(end(gr))]
-        end <- end(gr)
-        segment_end <- end
-        segment_start <- c(start(gr_reduced), end[-length(end)] + 1)
-        transcript <- gr$transcript
-        exon <- gr$exon
-        exon_rank <- gr$exon_rank
-        start_sort <- gr[order(start(gr))]
-        truncated <- c(
-          start_sort$truncated[1],
-          rep(TRUE, length(end) - 1)
-        )
-        CP <- grep("^proximalCP_", gr$annotatedProximalCP,
-          perl = TRUE, value = TRUE
-        )
-        if (length(CP) >= 1) {
-          CP <- gsub(
-            "_proximalCP", "",
-            paste(CP, collapse = "_")
+        gr_reduced <- reduce(gr)
+
+        strand <- strand(gr_reduced)
+        feature <- gr$feature[1]
+        gene <- gr$gene[1]
+        symbol <- gr$symbol[1]
+
+        if (as.character(strand(gr_reduced)) == "+") {
+          gr <- gr[order(start(gr))]
+          st <- start(gr)
+          segment_start <- st
+          segment_end <- c(st[-1] - 1, end(gr_reduced))
+          end_sort <- gr[order(-end(gr))]
+          transcript <- gr$transcript
+          exon <- gr$exon
+          exon_rank <- gr$exon_rank
+          truncated <- c(
+            rep(TRUE, length(st) - 1),
+            end_sort$truncated[1]
           )
-          CP <- paste(CP, paste(start(start_sort)[-1],
-            collapse = "_"
-          ),
-          sep = "_"
+          CP <- grep("^proximalCP_", gr$annotatedProximalCP,
+            perl = TRUE, value = TRUE
           )
-        } else {
-          CP <- paste("proximalCP",
-            paste(start(start_sort)[-1],
+          if (length(CP) >= 1) {
+            CP <- gsub("proximalCP_", "", paste(CP, collapse = "_"))
+            CP <- paste(CP, paste(end(end_sort)[-1], collapse = "_"),
+              sep = "_"
+            )
+          } else {
+            CP <- paste("proximalCP", paste(end(end_sort)[-1],
               collapse = "_"
-            ),
-            sep = "_"
+            ), sep = "_")
+          }
+        } else {
+          gr <- gr[order(end(gr))]
+          end <- end(gr)
+          segment_end <- end
+          segment_start <- c(start(gr_reduced), end[-length(end)] + 1)
+          transcript <- gr$transcript
+          exon <- gr$exon
+          exon_rank <- gr$exon_rank
+          start_sort <- gr[order(start(gr))]
+          truncated <- c(
+            start_sort$truncated[1],
+            rep(TRUE, length(end) - 1)
           )
+          CP <- grep("^proximalCP_", gr$annotatedProximalCP,
+            perl = TRUE, value = TRUE
+          )
+          if (length(CP) >= 1) {
+            CP <- gsub("proximalCP_", "", paste(CP, collapse = "_"))
+            CP <- paste(CP, paste(start(start_sort)[-1],
+              collapse = "_"
+            ), sep = "_")
+          } else {
+            CP <- paste("proximalCP", paste(start(start_sort)[-1],
+              collapse = "_"
+            ), sep = "_")
+          }
         }
+        gr <- GRanges(data.frame(
+          seqnames = seqnames(gr_reduced),
+          start = segment_start,
+          end = segment_end,
+          strand = strand(gr_reduced)
+        ),
+        exon_rank = exon_rank,
+        transcript = transcript,
+        feature = feature,
+        gene = gene,
+        exon = exon,
+        symbol = symbol,
+        annotatedProximalCP = CP,
+        truncated = truncated
+        )
       }
-      gr <- GRanges(data.frame(
-        seqnames =
-          seqnames(gr_reduced),
-        start = segment_start,
-        end = segment_end,
-        strand = strand(gr_reduced)
-      ),
-      exon_rank = exon_rank,
-      transcript = transcript,
-      feature = feature,
-      gene = gene,
-      exon = exon,
-      symbol = symbol,
-      annotatedProximalCP = CP,
-      truncated = truncated
-      )
-    }
-    gr
-  })
-  rmv_idx <- do.call("c", lapply(utr3.last_overlap_split, is.null))
-  utr3.last_overlap_split <- 
-    unlist(GRangesList(utr3.last_overlap_split[!rmv_idx]))
-  utr3.last <- c(utr3.last_isolated, utr3.last_overlap_split)
+      gr
+    })
+    rmv_idx <- do.call("c", lapply(utr3.last_overlap_split, is.null))
+    utr3.last_overlap_split <-
+      unlist(GRangesList(utr3.last_overlap_split[!rmv_idx]))
+    utr3.last <- c(utr3.last_isolated, utr3.last_overlap_split)
+  }
 
   ###################################################################
   #    reprocess 3' UTRs with the same start                        #
@@ -428,8 +487,10 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
   )]
   utr3.last.unknown <- utr3.last[utr3.last$annotatedProximalCP == "unknown"]
   utr3.last.sameStart.CP <-
-    strsplit(gsub("proximalCP_", "",
-                  utr3.last.sameStart$annotatedProximalCP), "_")
+    strsplit(gsub(
+      "proximalCP_", "",
+      utr3.last.sameStart$annotatedProximalCP
+    ), "_")
   utr3.last.sameStart.Start <- start(utr3.last.sameStart)
   utr3.last.sameStart.End <- end(utr3.last.sameStart)
   utr3.last.sameStart$annotatedProximalCP <- mapply(function(cp, st, en) {
@@ -454,25 +515,30 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
     )]
 
   ####################################################################
-  #       Determine the gap between the untracated 3' UTRs end       #
-  #                 and the next downstream  exon                    #
+  #       Determine the gap between the untrucated 3' UTRs end       #
+  #                 and the nearest downstream exon                  #
   ####################################################################
-  genome.info <- as.data.frame(seqinfo(TxDb))[, 1:2]
+  if (is(genome, "BSgenome")) {
+    genome.info <- as.data.frame(seqinfo(genome))[, 1:2]
+  } else {
+    genome.info <- as.data.frame(seqinfo(TxDb))[, 1:2]
+  }
+  genome.info <- genome.info[!rownames(genome.info) %in% chr2exclude, ]
+
   gaps <- tx %>%
     plyranges::reduce_ranges() %>%
     plyranges::set_genome_info(
       seqnames = rownames(genome.info),
       seqlengths = genome.info$seqlengths,
       is_circular = genome.info$isCircular
-    ) %>%
-    plyranges::complement_ranges()
+    ) %>% plyranges::complement_ranges()
 
-  utr3.clean.ext1 <- utr3.clean %>%
-    plyranges::filter(!truncated) %>%
+  utr3.clean.intact <- utr3.clean %>% plyranges::filter(!truncated)
+  utr3.clean.ext1 <- utr3.clean.intact %>%
     plyranges::shift_downstream(shift = 1L)
 
   ol <- findOverlaps(utr3.clean.ext1, gaps, ignore.strand = TRUE)
-  ol.utr3.clean <- utr3.clean[queryHits(ol)]
+  ol.utr3.clean <- utr3.clean.intact[queryHits(ol)]
 
   next.exons.gap <- gaps[subjectHits(ol)] %>%
     plyranges::mutate(strand = strand(ol.utr3.clean))
@@ -484,7 +550,7 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
   start(next.exons.gap)[wid & as.character(strand(next.exons.gap)) == "-"] <-
     end(next.exons.gap)[
       wid & as.character(strand(next.exons.gap)) == "-"
-    ] - MAX_EXONS_GAP + 1
+    ] - MAX_EXONS_GAP +1
   next.exons.gap <- next.exons.gap %>%
     plyranges::mutate(feature = "next.exon.gap")
   utr3.clean <- utr3.clean %>%
@@ -493,24 +559,57 @@ extract_UTR3Anno <- function(TxDb = NULL, edb = NULL,
   ###################################################################
   #             Get last CDS for coverage compensation              #
   ###################################################################
+  if ("lastCDS" %in% tx$feature) {
+    CDS.last <- tx %>%
+      plyranges::filter(feature == "lastCDS") %>%
+      plyranges::filter(transcript %in% utr3.clean$transcript)
+    CDS.last <- CDS.last[match(
+      utr3.clean$transcript,
+      CDS.last$transcript
+    )]
+    mcols(CDS.last) <- mcols(utr3.clean)
+    CDS.last$feature <- "CDS"
 
-  CDS.last <- tx %>%
-    plyranges::filter(feature == "lastCDS") %>%
-    plyranges::filter(transcript %in% utr3.clean$transcript)
-  CDS.last <- CDS.last[match(
-    utr3.clean$transcript,
-    CDS.last$transcript
-  )]
-  mcols(CDS.last) <- mcols(utr3.clean)
-  CDS.last$feature <- "CDS"
+    utr3.fixed <- c(utr3.clean, next.exons.gap, CDS.last)
+    names(utr3.fixed) <-
+      paste(utr3.fixed$exon, utr3.fixed$symbol,
+        utr3.fixed$feature,
+        sep = "|"
+      )
+    ## unlist the column "annotatedProximalCP"
+    utr3.fixed$annotatedProximalCP <- unlist(utr3.fixed$annotatedProximalCP)
+    utr3.fixed <- split(utr3.fixed, seqnames(utr3.fixed), drop = TRUE)
+  } else {
+    utr3.fixed <- c(utr3.clean, next.exons.gap)
+    utr3.fixed$annotatedProximalCP <- unlist(utr3.fixed$annotatedProximalCP)
+    names(utr3.fixed) <-
+        paste(utr3.fixed$exon, utr3.fixed$symbol,
+              utr3.fixed$feature,
+              sep = "|"
+        )
+    utr3.fixed <- split(utr3.fixed, seqnames(utr3.fixed), drop = TRUE)
+  }
 
-  utr3.fixed <- c(utr3.clean, next.exons.gap, CDS.last)
-
-  names(utr3.fixed) <-
-    paste(utr3.fixed$exon, utr3.fixed$symbol,
-      utr3.fixed$feature,
-      sep = "|"
+  utrs_file <- file.path(outdir, "01.3UTR.annotation.RDS")
+  saveRDS(utr3.fixed, file = utrs_file)
+  filename_df <- data.frame(type = "utr3", anno_file = utrs_file)
+  db_conn <- dbConnect(drv = RSQLite::SQLite(), dbname = sqlite_db)
+  res <- dbSendStatement(
+    db_conn,
+    paste0(
+      "DELETE FROM genome_anno ",
+      "WHERE type = 'utr3';"
     )
-  utr3.fixed <- split(utr3.fixed, seqnames(utr3.fixed), drop = TRUE)
+  )
+  dbClearResult(res)
+  res <- dbSendStatement(
+    db_conn,
+    "INSERT INTO
+                          genome_anno (type, anno_file)
+                          VALUES (:type, :anno_file);",
+    filename_df
+  )
+  dbClearResult(res)
+  dbDisconnect(db_conn)
   utr3.fixed
 }

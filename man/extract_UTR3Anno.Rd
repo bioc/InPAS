@@ -5,28 +5,40 @@
 \title{extract 3' UTR information from a \link[GenomicFeatures:TxDb-class]{GenomicFeatures::TxDb} object}
 \usage{
 extract_UTR3Anno(
-  TxDb = NULL,
-  edb = NULL,
-  removeScaffolds = FALSE,
-  MAX_EXONS_GAP = 10000
+  sqlite_db,
+  TxDb = getInPASTxDb(),
+  edb = getInPASEnsDb(),
+  genome = getInPASGenome(),
+  outdir = getInPASOutputDirectory(),
+  chr2exclude = getChr2Exclude(),
+  MAX_EXONS_GAP = 10000L
 )
 }
 \arguments{
-\item{TxDb}{an object of \link[GenomicFeatures:TxDb-class]{GenomicFeatures::TxDb}}
+\item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
+\code{\link[=setup_sqlitedb]{setup_sqlitedb()}}.}
+
+\item{TxDb}{An object of \link[GenomicFeatures:TxDb-class]{GenomicFeatures::TxDb}}
 
 \item{edb}{An object of \link[ensembldb:EnsDb-class]{ensembldb::EnsDb}}
 
-\item{removeScaffolds}{A logical(1) vector, whether the scaffolds should be
-removed from the genome If you use a TxDb containing alternative
-scaffolds, you'd better to remove the scaffolds.}
+\item{genome}{An object of \link[BSgenome:BSgenome-class]{BSgenome::BSgenome}}
 
-\item{MAX_EXONS_GAP}{An integer(1) vector, maximal gap sizes between last
-known CP sites to downstream exons}
+\item{outdir}{A character(1) vector, a path with write permission for storing
+InPAS analysis results. If it doesn't exist, it will be created.}
+
+\item{chr2exclude}{A character vector, NA or NULL, specifying chromosomes or
+scaffolds to be excluded for InPAS analysis. \code{chrM} and alternative scaffolds
+representing different haplotypes should be excluded.}
+
+\item{MAX_EXONS_GAP}{An integer(1) vector, maximal gap sizes between the last
+known CP sites to a nearest downstream exon. Default is 10 kb for mammalian
+genomes. For other species, user need to adjust this parameter.}
 }
 \value{
 An object of \link[GenomicRanges:GRangesList-class]{GenomicRanges::GRangesList}, containing GRanges for
 extracted 3' UTRs, and the corresponding last CDSs and next.exon.gap for
-each chromosome/scaffold.
+each chromosome/scaffold. Chromosome
 }
 \description{
 extract 3' UTR information from a \link[GenomicFeatures:TxDb-class]{GenomicFeatures::TxDb} object. The
@@ -36,22 +48,62 @@ be cut if there is any overlaps with other exons.
 \details{
 A good practice is to perform read alignment using a reference
 genome from Ensembl/GenCode including only the primary assembly and build a
-TxDb using the GTF/GFF files downloaded from the same source as the
-reference genome, such as BioMart/Ensembl/GenCode. For instruction, see
+TxDb and EnsDb using the GTF/GFF files downloaded from the same source as
+the reference genome, such as BioMart/Ensembl/GenCode. For instruction, see
 Vignette of the GenomicFeatures. The UCSC reference genomes and their
-annotation can be very cubersome.
+annotation packages can be very cumbersome.
 }
 \examples{
 library("EnsDb.Hsapiens.v86")
+library("BSgenome.Hsapiens.UCSC.hg19")
 library("GenomicFeatures")
+## set a sqlite database
+bedgraphs <- system.file("extdata", c(
+  "Baf3.extract.bedgraph",
+  "UM15.extract.bedgraph"
+),
+package = "InPAS"
+)
+tags <- c("Baf3", "UM15")
+metadata <- data.frame(
+  tag = tags,
+  condition = c("Baf3", "UM15"),
+  bedgraph_file = bedgraphs
+)
+outdir <- tempdir()
+
+write.table(metadata,
+  file = file.path(outdir, "metadata.txt"),
+  sep = "\t", quote = FALSE, row.names = FALSE
+)
+sqlite_db <- setup_sqlitedb(
+  metadata =
+    file.path(outdir, "metadata.txt"),
+  outdir
+)
+
 samplefile <- system.file("extdata",
-                          "hg19_knownGene_sample.sqlite",
-                           package = "GenomicFeatures")
+  "hg19_knownGene_sample.sqlite",
+  package = "GenomicFeatures"
+)
 TxDb <- loadDb(samplefile)
 edb <- EnsDb.Hsapiens.v86
-utr3 <- extract_UTR3Anno(TxDb, edb,
-                 removeScaffolds = TRUE,
-                 MAX_EXONS_GAP = 10000)
+genome <- BSgenome.Hsapiens.UCSC.hg19
+addInPASOutputDirectory(outdir)
+seqnames <- seqnames(BSgenome.Hsapiens.UCSC.hg19)
+chr2exclude <- c(
+  "chrM", "chrMT",
+  seqnames[grepl("_(hap\\\\d+|fix|alt)$",
+    seqnames,
+    perl = TRUE
+  )]
+)
+utr3 <- extract_UTR3Anno(sqlite_db, TxDb, edb,
+  genome = genome,
+  chr2exclude = chr2exclude,
+  outdir = tempdir(),
+  MAX_EXONS_GAP = 10000L
+)
 }
 \author{
 Jianhong Ou, Haibo Liu

@@ -6,15 +6,18 @@
 \usage{
 setup_CPsSearch(
   sqlite_db,
-  genome,
-  utr3,
+  genome = getInPASGenome(),
+  chr.utr3,
+  seqname,
   background = c("same_as_long_coverage_threshold", "1K", "5K", "10K", "50K"),
-  TxDb = NA,
-  removeScaffolds = FALSE,
+  TxDb = getInPASTxDb(),
   hugeData = TRUE,
-  outdir,
-  BPPARAM = NULL,
-  silence = FALSE
+  outdir = getInPASOutputDirectory(),
+  silence = FALSE,
+  minZ = 2,
+  cutStart = 10,
+  MINSIZE = 10,
+  coverage_threshold = 5
 )
 }
 \arguments{
@@ -23,8 +26,10 @@ setup_CPsSearch(
 
 \item{genome}{An object of \link[BSgenome:BSgenome-class]{BSgenome::BSgenome}}
 
-\item{utr3}{An object of \link[GenomicRanges:GRangesList-class]{GenomicRanges::GRangesList}, output of
-\code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}}}
+\item{chr.utr3}{An object of \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges}, an element of the
+output of \code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}}}
+
+\item{seqname}{A character(1), the name of a chromosome/scaffold}
 
 \item{background}{A character(1) vector, the range for calculating cutoff
 threshold of local background. It can be "same_as_long_coverage_threshold",
@@ -32,89 +37,104 @@ threshold of local background. It can be "same_as_long_coverage_threshold",
 
 \item{TxDb}{an object of \link[GenomicFeatures:TxDb-class]{GenomicFeatures::TxDb}}
 
-\item{removeScaffolds}{A logical(1) vector, whether the scaffolds should be
-removed from the genome If you use a TxDb containing alternative
-scaffolds, you'd better to remove the scaffolds.}
-
 \item{hugeData}{A logical(1) vector, indicating whether it is huge data}
 
 \item{outdir}{A character(1) vector, a path with write permission for storing
-the coverage data. If it doesn't exist, it will be created.}
-
-\item{BPPARAM}{an optional \link[BiocParallel:BiocParallelParam-class]{BiocParallel::BiocParallelParam} instance
-determining the parallel back-end to be used during evaluation, or a list
-of BiocParallelParam instances, to be applied in sequence for nested calls
-to bplapply. It can be set to NULL or bpparam()}
+InPAS analysis results. If it doesn't exist, it will be created.}
 
 \item{silence}{report progress or not. By default it doesn't report progress.}
+
+\item{minZ}{A numeric(1), a Z score cutoff value}
+
+\item{cutStart}{An integer(1) vector a numeric(1) vector. What percentage or
+how many nucleotides should be removed from 5' extremities before searching
+for CP sites? It can be a decimal between 0, and 1, or an integer greater
+than 1. 0.1 means 10 percent, 25 means cut first 25 bases}
+
+\item{MINSIZE}{A integer(1) vector, specifying the minimal length in bp of a
+short/proximal 3' UTR. Default, 10}
+
+\item{coverage_threshold}{An integer(1) vector, specifying the cutoff
+threshold of coverage for first 100 nucleotides. If the coverage of first
+100 nucleotides is lower than coverage_threshold, that transcript will be
+not considered for further analysis. Default, 5.}
 }
 \value{
-A list as described below:
-\describe{\item{utr3TotalCov}{chromosome-wise 3' UTR coverage in summarized
-View format}
-\describe{\item{chr1}{A filename for chr1 3' UTR coverage in
-summarized View format}
-\item{chr2}{A filename for chr2 3' UTR coverage in
-summarized View format}
-\item{chrN}{A filename for chrN 3' UTR coverage in
-summarized View format}}
-\item{background}{The type of methods for bckground
+A file storing a list as described below:
+\describe{\item{background}{The type of methods for background
 coverage calculation}
 \item{z2s}{Z-score cutoff thresholds for each 3' UTRs}
-\item{depth.weight}{A named vector containing depth weight}}
+\item{depth.weight}{A named vector containing depth weight}
+\item{chr.cov.merge}{A matrix storing condition/sample-specific
+coverage for 3' UTR and next.exon.gap (if exist)}
+\item{conn_next_utr3}{A logical vector, indicating whether a 3'UTR
+has a convergent 3' UTR of its downstream transcript}
+\item{chr.utr3}{A GRangesList, storing extracted 3' UTR annotation
+of transcript on a given chr}
+}
 }
 \description{
 prepare data for predicting cleavage and polyadenylation (CP) sites
 }
+\examples{
+if (interactive()) {
+  library(BSgenome.Mmusculus.UCSC.mm10)
+  library("TxDb.Mmusculus.UCSC.mm10.knownGene")
+  genome <- BSgenome.Mmusculus.UCSC.mm10
+  TxDb <- TxDb.Mmusculus.UCSC.mm10.knownGene
+
+  ## load UTR3 annotation and convert it into a GRangesList
+  data(utr3.mm10)
+  utr3 <- split(utr3.mm10, seqnames(utr3.mm10), drop = TRUE)
+
+  bedgraphs <- system.file("extdata", c(
+    "Baf3.extract.bedgraph",
+    "UM15.extract.bedgraph"
+  ),
+  package = "InPAS"
+  )
+  tags <- c("Baf3", "UM15")
+  metadata <- data.frame(
+    tag = tags,
+    condition = c("Baf3", "UM15"),
+    bedgraph_file = bedgraphs
+  )
+  outdir <- tempdir()
+  write.table(metadata,
+    file = file.path(outdir, "metadata.txt"),
+    sep = "\t", quote = FALSE, row.names = FALSE
+  )
+
+  sqlite_db <- setup_sqlitedb(
+    metadata = file.path(
+      outdir,
+      "metadata.txt"
+    ),
+    outdir
+  )
+  addLockName(filename = tempfile())
+  coverage <- list()
+  for (i in seq_along(bedgraphs)) {
+    coverage[[tags[i]]] <- get_ssRleCov(
+      bedgraph = bedgraphs[i],
+      tag = tags[i],
+      genome = genome,
+      sqlite_db = sqlite_db,
+      outdir = outdir,
+      chr2exclude = "chrM"
+    )
+  }
+  data4CPsitesSearch <- setup_CPsSearch(sqlite_db,
+    genome,
+    chr.utr3 = utr3[["chr6"]],
+    seqname = "chr6",
+    background = "10K",
+    TxDb = TxDb,
+    hugeData = TRUE,
+    outdir = outdir
+  )
+}
+}
 \author{
 Jianhong Ou, Haibo Liu
-
-@examples
-if (interactive()) {
-library(BSgenome.Mmusculus.UCSC.mm10)
-library("TxDb.Mmusculus.UCSC.mm10.knownGene")\preformatted{genome <- BSgenome.Mmusculus.UCSC.mm10
-TxDb <- TxDb.Mmusculus.UCSC.mm10.knownGene
-
-## load UTR3 annotation and convert it into a GRangesList
-data(utr3.mm10)
-utr3 <- split(utr3.mm10, seqnames(utr3.mm10))
-
-bedgraphs <- system.file("extdata",c("Baf3.extract.bedgraph",
-                                     "UM15.extract.bedgraph"),
-                        package = "InPAS")
-tags <- c("Baf3", "UM15")
-metadata <- data.frame(tag = tags,
-                       condition = c("Baf3", "UM15"),
-                       bedgraph_file = bedgraphs)
-outdir = tempdir()
-write.table(metadata, file =file.path(outdir, "metadata.txt"),
-            sep = "\\t", quote = FALSE, row.names = FALSE)
-
-sqlite_db <- setup_sqlitedb(metadata = file.path(outdir,
-                                                 "metadata.txt"),
-                            outdir)
-coverage <- list()
-for (i in seq_along(bedgraphs))\{
-coverage[[tags[i]]] <- get_ssRleCov(bedgraph = bedgraphs[i],
-                         tag = tags[i],
-                         genome = genome,
-                         sqlite_db = sqlite_db,
-                         outdir = outdir,
-                         removeScaffolds = TRUE)
-\}
-coverage_files <- assemble_allCov(sqlite_db,
-                                 outdir,
-                                 genome,
-                                 removeScaffolds = TRUE)
-data4CPsitesSearch <- setup_CPsSearch(sqlite_db,
-                                      genome,
-                                      utr3,
-                                     background = "10K",
-                                     TxDb = TxDb,
-                                     removeScaffolds = TRUE,
-                                     hugeData = TRUE,
-                                     outdir = outdir)
-}
-
-}
 }
