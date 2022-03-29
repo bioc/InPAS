@@ -60,25 +60,25 @@ search_distalCPs <- function(chr.cov.merge,
     # But per Haibo, this might be NOT correct in many cases.
     next.exon.gap <- .ele[grepl("next.exon.gap", names(.ele))]
     annotated.utr3 <- .ele[grepl("utr3", names(.ele))]
-
+    
     ## due to cutStart = 10, the first 10 bases are missing.
-    utr3start <- as.numeric(gsub("^.*_SEP_", "",
+    utr3start <- as.numeric(gsub("^.*_SEP_", "", 
                                  names(annotated.utr3)[1]))
     utr3end <- as.numeric(gsub(
         "^.*_SEP_", "",
         names(annotated.utr3)[length(annotated.utr3)]
     ))
-
+    
     ## prepare output data.frame
     info <- as.data.frame(curr_UTR.ele)[1, ]
     info$utr3start <- utr3start
     info$utr3end <- utr3end
     info$preliminary_distal_APA <- 0
-    info$NBC_adjusted_distal_APA <- NA
+    info$NBC_adjusted_distal_APA <- NA 
     info$Predicted_Distal_APA <- NA
     info$Predicted_Distal_APA_type <- NA
 
-    # detect gaps > window_size with 0 coverage and their width
+    # detect gaps > window_size with 0 coverage and their width 
     # and trimming the collapsed next.exon.gap coverage.
     refine_gap <- function(gap.cov, window_size,
                            conn_next_utr,
@@ -122,7 +122,7 @@ search_distalCPs <- function(chr.cov.merge,
         )
         next.exon.gap <- refined_gap$gap.cov
         conn_next_utr <- refined_gap$conn_next_utr
-    }
+    } 
         ## By Jianhong, cut if any connected two windows different from 30 times,
         ## to separate connected two UTRs or strange peaks. This cut is not
         ## implemented any more.
@@ -136,10 +136,10 @@ search_distalCPs <- function(chr.cov.merge,
         threshold <- long_coverage_threshold
       }
       next.exon.gap.thresholded <- next.exon.gap
-
+      
       # if coverage < threshold, set to 0
       next.exon.gap.thresholded[next.exon.gap.thresholded < threshold] <- 0
-
+      
       ## depending on if this next.exon.gao is shared by two convergent
       ## transcripts
       refined_gap <- refine_gap(
@@ -163,7 +163,7 @@ search_distalCPs <- function(chr.cov.merge,
       next.exon.gap <- InPAS:::remove_convergentUTR3s(next.exon.gap)
       conn_next_utr <- FALSE
     }
-
+    
     ## By Jianhong, trim low coverage from the 3' end if basewise coverage <
     ## long_coverage_threshold.
     next.exon.gap.end.pos <- 0
@@ -183,9 +183,9 @@ search_distalCPs <- function(chr.cov.merge,
       }
       if (length(id) > 0) {
         next.exon.gap.end.pos <- id[length(id)]
-      }
+      } 
     }
-
+    
     if (next.exon.gap.end.pos > 0) # longer 3' utr ending in next.exon.gap
     {
       distal.utr3.len <- length(annotated.utr3) + next.exon.gap.end.pos
@@ -212,12 +212,12 @@ search_distalCPs <- function(chr.cov.merge,
       }
       len <- sum(runLength(annotated.utr3.rle))
       annotated.utr3 <- annotated.utr3[seq_len(len)]
-
+      
       final.utr3 <- numeric(0)
       ## no 3' UTR of valid length
       info$preliminary_distal_APA <- -1
       info$Predicted_Distal_APA_type <- "undetectable"
-
+      
       ## trimming by background threshold from 3' end
       if (length(annotated.utr3) > 0) {
         if (background != "same_as_long_coverage_threshold") {
@@ -251,7 +251,7 @@ search_distalCPs <- function(chr.cov.merge,
           ## just a little shortened
           if (trimmed_len >= original_len - 200) {
             info$Predicted_Distal_APA_type <- "known distal"
-            info$preliminary_distal_APA <- {if (info$strand == "-"){info$start}
+            info$preliminary_distal_APA <- {if (info$strand == "-"){info$start} 
                 else {info$end}}
           } else {
             info$Predicted_Distal_APA_type <- "shortened novel distal"
@@ -278,7 +278,7 @@ search_distalCPs <- function(chr.cov.merge,
     SIMPLIFY = FALSE
   )
   dCPs <- do.call(rbind, lapply(distalCPs, `[[`, "info"))
-
+  
   ## depth-normalized sample/condition-specific coverage (utr3 + gap)
   chr.cov.merge <- lapply(distalCPs, `[[`, "cov")
   ## annotated 3' UTR coverage

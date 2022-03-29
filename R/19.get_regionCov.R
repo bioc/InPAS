@@ -7,8 +7,8 @@
 #'   InPAS analysis results. If it doesn't exist, it will be created.
 #' @param phmm A logical(1) vector, indicating whether data should be
 #'   prepared for singleSample analysis? By default, FALSE
-#' @param min.length.diff An integer(1) vector, specifying minimal length
-#' difference between proximal and distal APA sites which should be met to be
+#' @param min.length.diff An integer(1) vector, specifying minimal length 
+#' difference between proximal and distal APA sites which should be met to be 
 #' considered for differential APA analysis. Default is 200 bp.
 #'
 #' @return coverage view in GRanges

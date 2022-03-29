@@ -74,7 +74,7 @@ get_PAscore2 <- function(seqname,
   }
   gr_lists <- split(gr.s, ceiling(seq_along(gr.s) / 100))
   cores <- parallelly::availableCores() -1
-  scores <- future_lapply(gr_lists, nbc_scoring,
+  scores <- future_lapply(gr_lists, nbc_scoring, 
         future.scheduling = floor(length(gr_lists)/cores))
   pred.prob.test <- do.call(rbind, scores)
   pred.prob.test <- pred.prob.test[match(

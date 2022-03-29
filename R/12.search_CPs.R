@@ -71,12 +71,12 @@
 #'   valley and the end of the 3' UTR (where MSE of the last base is calculated).
 #'   If the last valley is closer to the end than the specified distance, it will
 #'   not be considered because it is very likely due to RNA coverage decay at the
-#'   end of mRNA. Default is 1200. User can consider a value between 1000 and
+#'   end of mRNA. Default is 1200. User can consider a value between 1000 and 
 #'   1500, depending on the library preparation procedures: RNA fragmentation and
 #'   size selection.
-#' @param output.all A logical(1), indicating whether to output entries with only
+#' @param output.all A logical(1), indicating whether to output entries with only 
 #'   single CP site for a 3' UTR. Default, FALSE.
-#'
+#' 
 #' @return An object of [GenomicRanges::GRanges-class] containing distal and
 #'   proximal CP site information for each 3' UTR if detected.
 #' @seealso [search_proximalCPs()], [adjust_proximalCPs()],
@@ -447,17 +447,17 @@ search_CPs <- function(seqname,
       DIST2END
     )
     ## save intermediate data before polishing
-    filename <- file.path(outdir, paste0(seqname,
+    filename <- file.path(outdir, paste0(seqname, 
                                          "_CPsites.no.polishing.RDS"))
     saveRDS(chr.abun, file = filename)
 
     ## polishing
-    chr.abun <- polish_CPs(chr.abun,
+    chr.abun <- polish_CPs(chr.abun, 
                            output.all = output.all,
                            DIST2END = DIST2END)
   } else {
     file.dir <- paste(outdir, seqname, sep = "_")
-
+    
     ## remove existing directory
     if (dir.exists(file.dir))
     {
@@ -471,7 +471,7 @@ search_CPs <- function(seqname,
     )
     cluster_type <- match.arg(cluster_type)
 
-    if (cluster_type %in% c("lsf", "sge", "slurm",
+    if (cluster_type %in% c("lsf", "sge", "slurm", 
                             "openlava", "torgue") &&
       !file.exists(template_file)) {
       stop("template_file doen't exist")
@@ -570,7 +570,7 @@ search_CPs <- function(seqname,
 
     ## start job
     submitJobs(resources = resources)
-    while (!waitForJobs(sleep = 120, timeout = Inf,
+    while (!waitForJobs(sleep = 120, timeout = Inf, 
                         stop.on.error = TRUE)) {
       Sys.sleep(120)
     }
@@ -578,14 +578,14 @@ search_CPs <- function(seqname,
                     stop.on.error = TRUE)) {
       chr.abun <- reduceResultsList()
       ## save intermediate data before polishing
-      filename <- file.path(outdir,
+      filename <- file.path(outdir, 
                             paste0(seqname, "_CPsites.non.polishing.RDS"))
       .collapse_list(dCP.list = chr.abun, filename = filename)
       ## polish
-      chr.abun <- do.call("rbind", lapply(chr.abun, polish_CPs,
+      chr.abun <- do.call("rbind", lapply(chr.abun, polish_CPs, 
                                           output.all = output.all,
                                           DIST2END = DIST2END))
-
+      
       ## delete registry afterwards
       unlink(reg$file.dir, recursive = TRUE, force = TRUE)
     }
@@ -602,7 +602,7 @@ search_CPs <- function(seqname,
                                       end.field = "end",
                                       strand.field = "strand",
                                       starts.in.df.are.0based = FALSE)
-   }
+   } 
   ## save chromosome-wise CP sites
   if (!is.null(CPsites)) {
     filename <- file.path(outdir, paste0(seqname, "_CPsites.RDS"))

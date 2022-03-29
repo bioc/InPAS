@@ -34,9 +34,9 @@ adjust_distalCPs <- function(distalCPs,
     chr.length <- seqlengths(genome)[seqname]
     ## only adjust distal APA if there is a proximal APA
     ## to speed up
-    proximal.APA <- lapply(distalCPs$Predicted_Proximal_APA,
+    proximal.APA <- lapply(distalCPs$Predicted_Proximal_APA, 
                           function(x) {!all(is.na(x))})
-
+    
     generate_gapCov <- function(gap, .proximal.APA, truncated,
                                 cp, ID, strand, chr.length) {
       ## longer 3'UTR must be at least 200 nt long
@@ -56,21 +56,21 @@ adjust_distalCPs <- function(distalCPs,
         # idx: absolute coordinates for pos
         # ID: final.utr3 unique id (from 1 to Nth)
         pos.mat <- cbind(pos, idx, ID)
-
+        
         # remove out of range position
-        pos.mat <- pos.mat[pos.mat[, "pos"] > 0 &
+        pos.mat <- pos.mat[pos.mat[, "pos"] > 0 & 
                              pos.mat[, "pos"] <= chr.length, ]
         return(pos.mat)
       } else {
         return(NULL)
       }
     }
-
+    
     gap.cov <- mapply(generate_gapCov,
                       final.utr3,
                       proximal.APA,
                       truncated,
-                      dCPs$preliminary_distal_APA,
+                      dCPs$preliminary_distal_APA, 
                       seq_along(final.utr3),
                       dCPs$strand,
                       chr.length,

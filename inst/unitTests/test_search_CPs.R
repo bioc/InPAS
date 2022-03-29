@@ -28,9 +28,9 @@ generateUTR3 <- function(normal = TRUE) {
     strand = "+",
     feature = c("utr3", "next.exon.gap"),
     annotatedProximalCP = "unknown",
-    exon = "transcript1",
+    exon = "transcript1", 
     transcript = "transcript1|",
-    gene = "1",
+    gene = "1", 
     truncated = FALSE,
     symbol = "gene1"
     )
@@ -109,9 +109,10 @@ get_CPs <- function(tags, conditions, filenames,
     shift_range = 100,
     step = 1,
     outdir = outdir,
-    silence = FALSE
+    silence = FALSE,
+    DIST2END = 0,
+    output.all = FALSE
   )
-
   list(CP = CP, sqlite_db = sqlite_db)
 }
 

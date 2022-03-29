@@ -532,11 +532,11 @@ extract_UTR3Anno <- function(sqlite_db,
       seqlengths = genome.info$seqlengths,
       is_circular = genome.info$isCircular
     ) %>% plyranges::complement_ranges()
-
+  
   utr3.clean.intact <- utr3.clean %>% plyranges::filter(!truncated)
-  utr3.clean.ext1 <- utr3.clean.intact %>%
+  utr3.clean.ext1 <- utr3.clean.intact %>% 
     plyranges::shift_downstream(shift = 1L)
-
+  
   ol <- findOverlaps(utr3.clean.ext1, gaps, ignore.strand = TRUE)
   ol.utr3.clean <- utr3.clean.intact[queryHits(ol)]
 
@@ -589,7 +589,7 @@ extract_UTR3Anno <- function(sqlite_db,
         )
     utr3.fixed <- split(utr3.fixed, seqnames(utr3.fixed), drop = TRUE)
   }
-
+  
   utrs_file <- file.path(outdir, "01.3UTR.annotation.RDS")
   saveRDS(utr3.fixed, file = utrs_file)
   filename_df <- data.frame(type = "utr3", anno_file = utrs_file)
