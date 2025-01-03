@@ -1,15 +1,15 @@
 Package: InPAS
 Title: Identify Novel Alternative PolyAdenylation Sites (PAS) from RNA-seq data
-Version: 2.15.1
+Version: 2.15.2
 Authors@R: c(person("Jianhong", "Ou", role = c("aut", "cre"), 
-             email = "jianhong.ou@duke.edu"), 
+             email = "jou@morgridge.org"), 
              person("Haibo", "Liu", role = c("aut"), 
              email = "haibo.liu@umassmed.edu"),
              person("Lihua Julie", "Zhu", role = c("aut"), 
              email = "Julie.Zhu@umassmed.edu"), 
              person("Sungmi M.", "Park", role = "aut"),
              person("Michael R.", "Green", role = "aut"))
-Maintainer: Jianhong Ou <jianhong.ou@duke.edu>
+Maintainer: Jianhong Ou <jou@morgridge.org>
 Description: Alternative polyadenylation (APA) is one of the important post-
              transcriptional regulation mechanisms which occurs in most human
              genes. InPAS facilitates the discovery of novel APA sites and the
