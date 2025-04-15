@@ -1,6 +1,6 @@
 Package: InPAS
 Title: Identify Novel Alternative PolyAdenylation Sites (PAS) from RNA-seq data
-Version: 2.15.2
+Version: 2.16.0
 Authors@R: c(person("Jianhong", "Ou", role = c("aut", "cre"), 
              email = "jou@morgridge.org"), 
              person("Haibo", "Liu", role = c("aut"), 
