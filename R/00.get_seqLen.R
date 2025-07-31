@@ -10,7 +10,7 @@
 #'
 #' @return A named numeric vector containing lengths per seqname, with the
 #'   seqnames as the names
-#' @seealso [GenomeInfoDb::Seqinfo-class]
+#' @seealso [Seqinfo::Seqinfo-class]
 #' @keywords internal
 #' @author Jianhong Ou, Haibo Liu
 #' @examples

@@ -30,7 +30,7 @@ InPAS:::get_seqLen(
 )
 }
 \seealso{
-\link[GenomeInfoDb:Seqinfo-class]{GenomeInfoDb::Seqinfo}
+\link[Seqinfo:Seqinfo-class]{Seqinfo::Seqinfo}
 }
 \author{
 Jianhong Ou, Haibo Liu

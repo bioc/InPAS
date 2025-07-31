@@ -1,6 +1,6 @@
 Package: InPAS
 Title: Identify Novel Alternative PolyAdenylation Sites (PAS) from RNA-seq data
-Version: 2.17.0
+Version: 2.17.1
 Authors@R: c(person("Jianhong", "Ou", role = c("aut", "cre"), 
              email = "jou@morgridge.org"), 
              person("Haibo", "Liu", role = c("aut"), 
@@ -22,15 +22,15 @@ License: GPL (>= 2)
 Imports: AnnotationDbi,batchtools,Biobase,Biostrings,BSgenome,cleanUpdTSeq,
          depmixS4,dplyr,flock,future,future.apply,GenomeInfoDb,GenomicRanges,
          GenomicFeatures, ggplot2, IRanges, limma, magrittr,methods,parallelly, 
-         plyranges, preprocessCore, readr,reshape2, RSQLite, stats,S4Vectors, 
-         utils
-Depends: R (>= 3.1)
+         plyranges, preprocessCore, readr,reshape2, RSQLite, Seqinfo, stats,
+         S4Vectors, utils
+Depends: R (>= 3.5)
 Suggests: BiocGenerics,BiocManager, BiocStyle, BSgenome.Mmusculus.UCSC.mm10,
           BSgenome.Hsapiens.UCSC.hg19, EnsDb.Hsapiens.v86, EnsDb.Mmusculus.v79,
           knitr, markdown, rmarkdown, rtracklayer, RUnit, grDevices,
           TxDb.Hsapiens.UCSC.hg19.knownGene,TxDb.Mmusculus.UCSC.mm10.knownGene
 VignetteBuilder: knitr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 LazyData: true
 Encoding: UTF-8

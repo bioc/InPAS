@@ -54,7 +54,8 @@
 #' @importFrom plyranges as_granges complement_ranges disjoin_ranges filter
 #'   group_by mutate reduce_ranges reduce_ranges_directed remove_names select
 #'   set_genome_info shift_downstream summarise
-#' @importFrom GenomeInfoDb seqlengths seqlevelsStyle mapSeqlevels seqlevels
+#' @importFrom Seqinfo seqlengths seqlevels
+#' @importFrom GenomeInfoDb seqlevelsStyle mapSeqlevels
 #' @export
 #' @author Jianhong Ou, Haibo Liu
 
@@ -191,7 +192,8 @@ setup_parCPsSearch <- function(sqlite_db,
 #' @importFrom plyranges as_granges complement_ranges disjoin_ranges filter
 #'   group_by mutate reduce_ranges reduce_ranges_directed remove_names select
 #'   set_genome_info shift_downstream summarise
-#' @importFrom GenomeInfoDb seqlengths seqlevelsStyle mapSeqlevels seqlevels
+#' @importFrom Seqinfo seqlengths seqlevels
+#' @importFrom GenomeInfoDb seqlevelsStyle mapSeqlevels
 #' @export
 #' @author Jianhong Ou, Haibo Liu
 #'

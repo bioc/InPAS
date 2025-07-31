@@ -33,7 +33,8 @@
 #'           }
 #' @importFrom dplyr as_tibble mutate filter arrange bind_rows group_by
 #'   left_join summarise n bind_cols syms desc pull
-#' @importFrom GenomeInfoDb seqlengths seqlevelsStyle mapSeqlevels
+#' @importFrom Seqinfo seqlengths
+#' @importFrom GenomeInfoDb seqlevelsStyle mapSeqlevels
 #' @import readr RSQLite S4Vectors GenomicRanges flock
 #' @importFrom future.apply future_lapply
 #' @importFrom magrittr %>%
