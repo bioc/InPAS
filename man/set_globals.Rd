@@ -17,7 +17,7 @@ set_globals(
 \item{genome}{An object \link[BSgenome:BSgenome-class]{BSgenome::BSgenome}. To make things easy, we
 suggest users creating a \link[BSgenome:BSgenome-class]{BSgenome::BSgenome} instance from the
 reference genome used for read alignment. For details, see the
-documentation of \code{\link[BSgenome:BSgenomeForge]{BSgenome::forgeBSgenomeDataPkg()}}.}
+documentation of \code{\link[BSgenome:AdvancedBSgenomeForge]{BSgenome::forgeBSgenomeDataPkg()}}.}
 
 \item{TxDb}{An object of \link[GenomicFeatures:TxDb-class]{GenomicFeatures::TxDb}}
 

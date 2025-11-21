@@ -34,8 +34,7 @@
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
 #' \code{new("UTR3eSet", ...)}.
-#' @author Jianhong Ou
-#' @seealso \code{\linkS4class{GRanges}}
+#' @seealso \code{GRanges}
 #' @export
 #' @author Jianhong Ou
 

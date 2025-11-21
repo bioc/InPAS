@@ -85,9 +85,8 @@ get_UTR3CDS <- function(sqlite_db,
 
   ## merge utr3.regions with CDS of the same set of transcripts whose
   ## utr3.regions are considered
-  CDS <- chr.utr3 %>%
-    plyranges::filter(feature == "CDS" &
-      transcript %in% unique(utr3.regions$transcript))
+  CDS <- chr.utr3[chr.utr3$feature == "CDS" &
+                    chr.utr3$transcript %in% unique(utr3.regions$transcript)]
   utr3.cds.regions <- c(utr3.regions, CDS)
   saveRDS(utr3.cds.regions, 
           file = file.path(outdir, paste0(seqname, "_UTR3CDS.RDS")))

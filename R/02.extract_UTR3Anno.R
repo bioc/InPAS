@@ -26,9 +26,9 @@
 #'   genomes. For other species, user need to adjust this parameter.
 #' @import GenomicRanges
 #' @importFrom IRanges IRanges
-#' @importFrom plyranges as_granges complement_ranges disjoin_ranges filter
-#' group_by mutate reduce_ranges reduce_ranges_directed remove_names select
-#' set_genome_info shift_downstream summarise
+#' @importFrom plyranges as_granges complement_ranges disjoin_ranges
+#' reduce_ranges reduce_ranges_directed remove_names 
+#' set_genome_info shift_downstream
 #' @importFrom dplyr as_tibble mutate filter arrange bind_rows group_by
 #'   left_join summarise n
 #'
@@ -138,27 +138,22 @@ extract_UTR3Anno <- function(sqlite_db,
   }
 
   # mono-exon ncRNA is not used for InPAS analysis
-  utr3 <- tx %>%
-    plyranges::filter(feature != "ncRNA" &
-      feature %in% c("utr3", "lastutr3")) %>%
-    unique()
+  utr3 <- unique(tx[tx$feature!="ncRNA"&
+              tx$feature %in% c("utr3", "lastutr3")])
+  utr3.last <- utr3[utr3$feature == "lastutr3"]
 
-  utr3.last <- utr3 %>% plyranges::filter(feature == "lastutr3")
-
-  exons.not.utr3.last <- tx %>%
-    plyranges::filter(feature != "lastutr3") %>%
-    unique()
+  exons.not.utr3.last <- unique(tx[tx$feature != "lastutr3"])
 
   utr3.last.block <- utr3.last
 
   ## reduce GRanges to cover from min_start to max_end
-  getRange <- function(gr, f) {
-    gr <- gr %>%
-      plyranges::group_by(seqnames, !!!syms(f), strand) %>%
-      plyranges::summarise(start = min(start), end = max(end)) %>%
-      plyranges::as_granges()
-    gr
-  }
+  # getRange <- function(gr, f) {
+  #   gr <- gr %>%
+  #     plyranges::group_by(seqnames, !!!syms(f), strand) %>%
+  #     plyranges::summarise(start = min(start), end = max(end)) %>%
+  #     plyranges::as_granges()
+  #   gr
+  # }
 
   ## mask 5UTR-CDS and any other region from last 3UTR
   # non.utr3 <- getRange(exons.not.utr3.last, "transcript") %>%
@@ -239,9 +234,9 @@ extract_UTR3Anno <- function(sqlite_db,
   ####################################################################
   #           MASK TWO by 3' UTR on the opposite strand              #
   ####################################################################
-  utr3.reverse.strand <- utr3.last %>%
-    plyranges::mutate(strand = ifelse(strand == "+", "-", "+")) %>%
-    plyranges::reduce_ranges_directed()
+  utr3.reverse.strand <- utr3.last
+  strand(utr3.reverse.strand) <- ifelse(strand(utr3.reverse.strand) == "+", "-", "+")
+  utr3.reverse.strand <- plyranges::reduce_ranges_directed(utr3.reverse.strand)
 
   ol.utr3.rev <- findOverlaps(utr3.last, utr3.reverse.strand,
     ignore.strand = FALSE, minoverlap = 1
@@ -262,9 +257,10 @@ extract_UTR3Anno <- function(sqlite_db,
   }
 
   ## keep the last 3' utr for each transcripts
-  utr3.last$feature <- "utr3"
-  utr3.last <- assign_feature(utr3.last, feature_alt = "lastutr3") %>%
-    plyranges::filter(feature == "lastutr3", width > 1) %>%
+  utr3.last$feature <- rep("utr3", length(utr3.last))
+  utr3.last <- assign_feature(utr3.last, feature_alt = "lastutr3")
+  utr3.last <- utr3.last[utr3.last$feature == "lastutr3" &
+                           width(utr3.last)>1] %>%
     unique()
 
   #####################################################################
@@ -274,18 +270,13 @@ extract_UTR3Anno <- function(sqlite_db,
 
   collapse_same_start_utr <- function(gr) {
     utr3.last <- gr
-    utr3.last <- utr3.last %>%
-      unique() %>%
-      plyranges::mutate(
-        start.utr3.last = paste(seqnames, start,
-          gene,
-          sep = ":"
-        ),
-        end.utr3.last = paste(seqnames, end,
-          gene,
-          sep = ":"
-        )
-      )
+    utr3.last <- unique(utr3.last)
+    mcols(utr3.last)$start.utr3.last <- paste(as.character(seqnames(gr)),
+                                              start(gr),
+                                              gr$gene, sep = ":")
+    mcols(utr3.last)$end.utr3.last   <- paste(as.character(seqnames(gr)),
+                                              end(gr),
+                                              gr$gene, sep = ":")
 
     start.dup <- with(
       utr3.last,
@@ -297,25 +288,24 @@ extract_UTR3Anno <- function(sqlite_db,
       unique(end.utr3.last[duplicated(end.utr3.last) &
         as.character(strand(utr3.last)) == "-"])
     )
-    utr3.last.dup <- utr3.last %>%
-      plyranges::filter(start.utr3.last %in% start.dup |
-        end.utr3.last %in% end.dup)
+    utr3.last.dup <- utr3.last[utr3.last$start.utr3.last %in% start.dup |
+                                 utr3.last$end.utr3.last %in% end.dup] 
 
     if (length(utr3.last.dup) > 0) {
-      utr3.last.nd <- utr3.last %>%
-        plyranges::filter(!(start.utr3.last %in% start.dup |
-          end.utr3.last %in% end.dup)) %>%
-        plyranges::select(-c(start.utr3.last, end.utr3.last)) %>%
+      utr3.last.nd <- utr3.last[!(utr3.last$start.utr3.last %in% start.dup |
+                                  utr3.last$end.utr3.last %in% end.dup)]
+      utr3.last.nd$start.utr3.last <- NULL
+      utr3.last.nd$end.utr3.last <- NULL
+      utr3.last.nd <- utr3.last.nd %>%
         dplyr::mutate(annotatedProximalCP = "unknown")
 
+      utr3.last.dup$dup.group <- ifelse(strand(utr3.last.dup) == "+",
+                                        utr3.last.dup$start.utr3.last,
+                                        utr3.last.dup$end.utr3.last)
+      utr3.last.dup$start.utr3.last <- NULL
+      utr3.last.dup$end.utr3.last <- NULL
+      
       utr3.last.dup <- utr3.last.dup %>%
-        plyranges::mutate(
-          dup.group =
-            ifelse(strand == "+",
-              start.utr3.last, end.utr3.last
-            )
-        ) %>%
-        plyranges::select(-c(start.utr3.last, end.utr3.last)) %>%
         data.frame() %>%
         dplyr::as_tibble() %>%
         dplyr::arrange(dup.group, desc(width))
@@ -342,8 +332,8 @@ extract_UTR3Anno <- function(sqlite_db,
 
       utr3.last <- c(utr3.last.nd, utr3.last.dup)
     } else {
-      utr3.last <- gr %>%
-        plyranges::mutate(annotatedProximalCP = "unknown")
+      utr3.last <- gr 
+      utr3.last$annotatedProximalCP <- rep('unknown', length(gr))
     }
     utr3.last
   }
@@ -353,7 +343,7 @@ extract_UTR3Anno <- function(sqlite_db,
   #               Mark truncated 3UTR (3821 truncated utr3)            #
   ######################################################################
 
-  utr3.last$truncated <- FALSE
+  utr3.last$truncated <- rep(FALSE, length(utr3.last))
   utr3.last$truncated[as.character(strand(utr3.last)) == "+" &
     end(utr3.last) <
       end(utr3.last.block[match(
@@ -533,15 +523,15 @@ extract_UTR3Anno <- function(sqlite_db,
       is_circular = genome.info$isCircular
     ) %>% plyranges::complement_ranges()
   
-  utr3.clean.intact <- utr3.clean %>% plyranges::filter(!truncated)
+  utr3.clean.intact <- utr3.clean[!utr3.clean$truncated]
   utr3.clean.ext1 <- utr3.clean.intact %>% 
     plyranges::shift_downstream(shift = 1L)
   
   ol <- findOverlaps(utr3.clean.ext1, gaps, ignore.strand = TRUE)
   ol.utr3.clean <- utr3.clean.intact[queryHits(ol)]
 
-  next.exons.gap <- gaps[subjectHits(ol)] %>%
-    plyranges::mutate(strand = strand(ol.utr3.clean))
+  next.exons.gap <- gaps[subjectHits(ol)]
+  strand(next.exons.gap) <- strand(ol.utr3.clean)
   mcols(next.exons.gap) <- mcols(ol.utr3.clean)
 
   wid <- width(next.exons.gap) > MAX_EXONS_GAP
@@ -551,24 +541,21 @@ extract_UTR3Anno <- function(sqlite_db,
     end(next.exons.gap)[
       wid & as.character(strand(next.exons.gap)) == "-"
     ] - MAX_EXONS_GAP +1
-  next.exons.gap <- next.exons.gap %>%
-    plyranges::mutate(feature = "next.exon.gap")
-  utr3.clean <- utr3.clean %>%
-    plyranges::mutate(feature = "utr3")
+  next.exons.gap$feature <- rep('next.exon.gap', length(next.exons.gap))
+  utr3.clean$feature <- rep("utr3", length(utr3.clean))
 
   ###################################################################
   #             Get last CDS for coverage compensation              #
   ###################################################################
   if ("lastCDS" %in% tx$feature) {
-    CDS.last <- tx %>%
-      plyranges::filter(feature == "lastCDS") %>%
-      plyranges::filter(transcript %in% utr3.clean$transcript)
+    CDS.last <- tx[tx$feature=="lastCDS"]
+    CDS.last <- CDS.last[CDS.last$transcript %in% utr3.clean$transcript]
     CDS.last <- CDS.last[match(
       utr3.clean$transcript,
       CDS.last$transcript
     )]
     mcols(CDS.last) <- mcols(utr3.clean)
-    CDS.last$feature <- "CDS"
+    CDS.last$feature <- rep("CDS", length(CDS.last))
 
     utr3.fixed <- c(utr3.clean, next.exons.gap, CDS.last)
     names(utr3.fixed) <-

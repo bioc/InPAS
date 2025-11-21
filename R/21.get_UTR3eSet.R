@@ -163,7 +163,7 @@ get_UTR3eSet <- function(sqlite_db,
     message("Single sample mode is on")
     singleSample <- TRUE
   }
-  UTRusage <- UTR3_CDS.cov %>% plyranges::filter(!is.na(source))
+  UTRusage <- UTR3_CDS.cov[!is.na(UTR3_CDS.cov$source)]
   UTRusage <- split(UTRusage, UTRusage$transcript)
   UTRusage <- UTRusage[sapply(UTRusage, length) == 2]
   UTRusage <- unlist(UTRusage, use.names = FALSE)
@@ -186,9 +186,10 @@ get_UTR3eSet <- function(sqlite_db,
   UTRusage.short.data <- UTRusage.total.data - UTRusage.long.data
   lt0 <- apply(UTRusage.short.data, 1, function(.ele) any(.ele < 0))
   if (any(lt0)) {
-    CDSusage <- UTR3_CDS.cov %>%
-      plyranges::filter(feature == "CDS" &
-        transcript %in% unique(PDUItable$transcript[lt0]))
+    CDSusage <-
+      UTR3_CDS.cov[UTR3_CDS.cov$feature == "CDS" &
+                     UTR3_CDS.cov$transcript %in% 
+                     unique(PDUItable$transcript[lt0])]
     CDSusage.data <- do.call(rbind, CDSusage$data)
     rownames(CDSusage.data) <- CDSusage$transcript
     idx <- match(PDUItable$transcript[lt0], CDSusage$transcript)
