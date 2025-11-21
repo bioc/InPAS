@@ -290,3 +290,43 @@ set_globals <- function(genome = NULL,
   addChr2Exclude(chr2exclude)
   invisible(0)
 }
+
+
+#' @noRd
+#' @param grl GRanges
+#' @param feature additional features
+#' @param drop columns to be dropped
+#' @param name_col name column
+grl_to_tibble <- function(grl, feature = NULL, drop = NULL,
+                          name_col = "transcript",
+                          output=c('tibble', 'granges')) {
+  output <- match.arg(output)
+  gr <- unlist(grl)
+  
+  ## add name column from the GRangesList names
+  mcols(gr)[[name_col]] <- names(gr)
+  
+  ## remove names() on the GRanges object
+  names(gr) <- NULL
+  
+  ## add feature column if provided
+  if (!is.null(feature)) {
+    gr$feature <- feature
+  }
+  
+  ## drop metadata columns if provided
+  if (!is.null(drop)) {
+    for (d in drop) {
+      if (d %in% colnames(mcols(gr))) {
+        mcols(gr)[[d]] <- NULL
+      }
+    }
+  }
+  
+  if(output=='tibble'){
+    ## return tibble
+    as_tibble(as.data.frame(gr))
+  }else{
+    gr
+  }
+}

@@ -17,9 +17,9 @@
 #'   genomes. For other species, user need to adjust this parameter.
 #' @import GenomicRanges
 #' @importFrom IRanges IRanges
-#' @importFrom plyranges as_granges complement_ranges disjoin_ranges filter
-#' group_by mutate reduce_ranges reduce_ranges_directed remove_names select
-#' set_genome_info shift_downstream summarise
+#' @importFrom plyranges as_granges complement_ranges disjoin_ranges
+#' reduce_ranges reduce_ranges_directed remove_names
+#' set_genome_info shift_downstream
 #' @importFrom dplyr as_tibble mutate filter arrange bind_rows group_by
 #'   left_join summarise n
 #' @return A BED file with 6 columns: chr, chrStart, chrEnd, name, score, and
@@ -65,21 +65,19 @@ get_lastCDSUTR3 <- function(TxDb = getInPASTxDb(),
   seqlevels(TxDb) <- seqlevels
 
   ## get all transcripts
-  tx <- unlist(transcriptsBy(TxDb, by = "gene")) %>%
-    plyranges::mutate(gene = names(.)) %>%
-    plyranges::remove_names() %>%
-    plyranges::mutate(tx_id = as.character(tx_id)) %>%
-    data.frame() %>%
+  tx <- unlist(transcriptsBy(TxDb, by = "gene"))
+  tx$gene <- names(tx)
+  names(tx) <- NULL
+  tx$tx_id <- as.character(tx$tx_id)
+  tx <- data.frame(tx) %>%
     as_tibble()
 
   ## get all exons and label the last exons
-  exons <-
-    unlist(exonsBy(TxDb, by = "tx", use.names = TRUE)) %>%
-    plyranges::mutate(tx_name = names(.)) %>%
-    plyranges::remove_names() %>%
-    plyranges::select(-c("exon_id", "exon_name")) %>%
-    data.frame() %>%
-    as_tibble() %>%
+  exons <- grl_to_tibble(
+    exonsBy(TxDb, by = "tx", use.names = TRUE),
+    name_col = 'tx_name',
+    drop = c('exon_id', 'exon_name')
+  ) %>%
     dplyr::arrange(seqnames, tx_name, -exon_rank)
 
   num_exons <- exons %>%
@@ -157,8 +155,8 @@ get_lastCDSUTR3 <- function(TxDb = getInPASTxDb(),
   )
   ol.utr3.clean <- last_exons[queryHits(ol)]
 
-  next.exons.gap <- gaps[subjectHits(ol)] %>%
-    plyranges::mutate(strand = strand(ol.utr3.clean))
+  next.exons.gap <- gaps[subjectHits(ol)]
+  strand(next.exons.gap) <- strand(ol.utr3.clean)
   mcols(next.exons.gap) <- mcols(ol.utr3.clean)
   names(next.exons.gap) <- names(ol.utr3.clean)
 
@@ -170,8 +168,7 @@ get_lastCDSUTR3 <- function(TxDb = getInPASTxDb(),
     as.character(strand(next.exons.gap)) == "-"] <-
     end(next.exons.gap)[wid &
       as.character(strand(next.exons.gap)) == "-"] - MAX_EXONS_GAP + 1
-  next.exons.gap <- next.exons.gap %>%
-    plyranges::mutate(feature = "next.exon.gap")
+  next.exons.gap$feature <- rep('next.exon.gap', length(next.exons.gap))
   next.exons.gap.width <- width(next.exons.gap)
   names(next.exons.gap.width) <- names(next.exons.gap)
   next.exons.gap.width <-

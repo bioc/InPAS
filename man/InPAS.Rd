@@ -2,6 +2,7 @@
 % Please edit documentation in R/00.InPAS-package.R
 \docType{package}
 \name{InPAS}
+\alias{-package}
 \alias{InPAS}
 \title{A package for identifying novel Alternative PolyAdenylation
 Sites (PAS) based on RNA-seq data}

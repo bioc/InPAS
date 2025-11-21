@@ -24,7 +24,7 @@ SQLite database}
 \item{genome}{an object \link[BSgenome:BSgenome-class]{BSgenome::BSgenome}. To make things easy, we
 suggest users creating a \link[BSgenome:BSgenome-class]{BSgenome::BSgenome} instance from the
 reference genome used for read alignment. For details, see the
-documentation of \code{\link[BSgenome:BSgenomeForge]{BSgenome::forgeBSgenomeDataPkg()}}.}
+documentation of \code{\link[BSgenome:AdvancedBSgenomeForge]{BSgenome::forgeBSgenomeDataPkg()}}.}
 
 \item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
 \code{\link[=setup_sqlitedb]{setup_sqlitedb()}}.}

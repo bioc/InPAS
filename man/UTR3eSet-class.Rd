@@ -47,10 +47,8 @@ Objects can be created by calls of the form \code{new("UTR3eSet", ...)}
 }
 
 \seealso{
-\code{\linkS4class{GRanges}}
+\code{GRanges}
 }
 \author{
-Jianhong Ou
-
 Jianhong Ou
 }

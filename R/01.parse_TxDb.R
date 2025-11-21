@@ -49,9 +49,9 @@ assign_feature <- function(gr, feature_alt = "utr3") {
 #' @return A [GenomicRanges::GRanges-class] object for gene models
 #'
 #' @import GenomicFeatures
-#' @importFrom plyranges as_granges complement_ranges disjoin_ranges filter
-#'   group_by mutate reduce_ranges reduce_ranges_directed remove_names select
-#'   set_genome_info shift_downstream summarise
+#' @importFrom plyranges as_granges complement_ranges disjoin_ranges
+#'   reduce_ranges reduce_ranges_directed remove_names
+#'   set_genome_info shift_downstream
 #' @importFrom dplyr as_tibble mutate select pull filter arrange bind_rows
 #'   group_by left_join summarise n
 #' @importFrom magrittr %>%
@@ -154,55 +154,51 @@ parse_TxDb <- function(sqlite_db = NULL,
     )
   }
   seqlevels(TxDb) <- seqlevels
-
+  
   ## get all transcripts
-  tx <- unlist(transcriptsBy(TxDb, by = "gene")) %>%
-    plyranges::mutate(gene = names(.)) %>%
-    plyranges::remove_names() %>%
-    plyranges::select(-c("tx_id")) %>%
-    data.frame() %>%
-    as_tibble()
-
+  tx <- grl_to_tibble(
+    transcriptsBy(TxDb, by = "gene"),
+    name_col = "gene",
+    drop = 'tx_id'
+  )
+  
   ## recover CDS and UTRs for coding transcripts
-  cds <- unlist(cdsBy(TxDb, by = "tx", use.names = TRUE)) %>%
-    plyranges::mutate(transcript = names(.), feature = "CDS") %>%
-    plyranges::remove_names() %>%
-    plyranges::select(-c("cds_id", "cds_name")) %>%
-    data.frame() %>%
-    as_tibble()
+  cds <- grl_to_tibble(
+    cdsBy(TxDb, by = "tx", use.names = TRUE),
+    name_col = 'transcript',
+    feature = "CDS",
+    drop= c('cds_id', 'cds_name')
+  )
   cds <- assign_feature(cds, feature_alt = "lastCDS")
 
+  ## UTR5
+  utr5 <- grl_to_tibble(
+    fiveUTRsByTranscript(TxDb, use.names = TRUE),
+    name_col = 'transcript',
+    feature = "utr5",
+    drop = c('exon_id', 'exon_name')
+  )
 
-  utr5 <- unlist(fiveUTRsByTranscript(TxDb,
-    use.names = TRUE
-  )) %>%
-    plyranges::mutate(transcript = names(.), feature = "utr5") %>%
-    plyranges::remove_names() %>%
-    plyranges::select(-c("exon_id", "exon_name")) %>%
-    data.frame() %>%
-    as_tibble()
-
-  utr3 <- unlist(threeUTRsByTranscript(TxDb,
-    use.names = TRUE
-  )) %>%
-    plyranges::mutate(transcript = names(.), feature = "utr3") %>%
-    plyranges::remove_names() %>%
-    plyranges::select(-c("exon_id", "exon_name")) %>%
-    data.frame() %>%
-    as_tibble()
+  ## UTR3
+  utr3 <- grl_to_tibble(
+    threeUTRsByTranscript(TxDb, use.names = TRUE),
+    name_col = "transcript",
+    feature = "utr3",
+    drop = c('exon_id', 'exon_name')
+  )
   utr3 <- assign_feature(utr3, feature_alt = "lastutr3")
 
   ## exons for non-coding transcripts
-  exons <- unlist(exonsBy(TxDb,
-    by = "tx",
-    use.names = TRUE
-  )) %>%
-    plyranges::mutate(transcript = names(.)) %>%
-    plyranges::remove_names() %>%
-    plyranges::select(-c("exon_id", "exon_name"))
+  exons <- grl_to_tibble(
+    exonsBy(TxDb,
+            by = "tx",
+            use.names = TRUE),
+    name_col = 'transcript',
+    drop = c('exon_id', 'exon_name'),
+    output = 'granges'
+  )
 
-  noncoding_exons <- exons %>%
-    plyranges::filter(!transcript %in% cds$transcript) %>%
+  noncoding_exons <- exons[!exons$transcript %in% cds$transcript] %>%
     data.frame() %>%
     dplyr::as_tibble() %>%
     dplyr::arrange(seqnames, transcript, -exon_rank)

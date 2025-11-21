@@ -28,8 +28,8 @@ search_CPs(
   template_file = NULL,
   mc.cores = 1,
   future.chunk.size = 50,
-  resources = list(walltime = 3600 * 8, ncpus = 4, mpp = 1024 * 4, queue = "long",
-    memory = 4 * 4 * 1024),
+  resources = list(walltime = 3600 * 8, ncpus = 4, mpp = 1024 * 4, queue = "long", memory
+    = 4 * 4 * 1024),
   DIST2ANNOAPAP = 500,
   DIST2END = 1000,
   output.all = FALSE

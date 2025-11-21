@@ -189,11 +189,11 @@ run_coverageQC <- function(sqlite_db,
   tx <- readRDS(anno_files[anno_files$type == "transcripts", 2])
   # tx <- parse_TxDb(sqlite_db, TxDb, edb,
   #                  chr2exclude = chr2exclude)
-  exon <- tx %>% plyranges::select(exon, feature, gene)
-  UTR3 <- tx %>%
-    plyranges::filter(feature %in% c("lastutr3", "utr3")) %>%
-    plyranges::mutate(feature = "utr3")
-
+  exon <- tx
+  mcols(exon) <- mcols(exon)[, c('exon', 'feature', 'gene')]
+  UTR3 <- tx[tx$feature %in% c("lastutr3", "utr3")]
+  UTR3$feature <- 'utr3'
+  
   if (length(which) > 0) {
     ol <- GenomicRanges::findOverlaps(exon, which, ignore.strand = TRUE)
     tx <- exon[sort(unique(queryHits(ol)))]
@@ -204,7 +204,7 @@ run_coverageQC <- function(sqlite_db,
   ## reduce exon and UTR3 for each gene
   reduce_by_gene <- function(gr) {
     gr <- gr %>%
-      plyranges::group_by(seqnames, gene) %>%
+      group_by(seqnames, gene) %>%
       plyranges::reduce_ranges_directed()
     gr
   }
