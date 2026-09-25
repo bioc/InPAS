@@ -15,7 +15,7 @@
 #' \dontrun{
 #' library(BSgenome.Mmusculus.UCSC.mm10)
 #' genome <- BSgenome.Mmusculus.UCSC.mm10
-#' InPAS:::gcContents(genome, "chr1")
+#' gcContents(genome, "chr1")
 #' }
 #'
 gcContents <- function(genome, seqname, nonATCGExclude = TRUE) {
@@ -63,7 +63,7 @@ gcContents <- function(genome, seqname, nonATCGExclude = TRUE) {
 #' \dontrun{
 #' library(BSgenome.Mmusculus.UCSC.mm10)
 #' genome <- BSgenome.Mmusculus.UCSC.mm10
-#' InPAS:::gcComp(genome, "chr1")
+#' gcComp(genome, "chr1")
 #' }
 #'
 gcComp <- function(genome, seqnames, window = 50,

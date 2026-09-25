@@ -45,7 +45,7 @@ fft.smooth <- function(sn, p) {
 #'   element of the output of [extract_UTR3Anno()] for a given chromosome.
 #' @param chr.totalCov total coverage for each condition of a given chromosome. It
 #'   must be an output of [get_totalCov()]
-#' @param gcCompensationensation GC compensation vector. Not support yet.
+#' @param gcCompensation GC compensation vector. Not support yet.
 #' @param mappabilityCompensation mappability compensation vector. Not support
 #'   yet.
 #' @param FFT Use FFT smooth or not.

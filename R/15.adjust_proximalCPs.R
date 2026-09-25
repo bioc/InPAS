@@ -122,7 +122,7 @@ adjust_proximalCPs <- function(CPs,
   
   if (is(classifier, "PASclassifier")) {
     cov_diff.list <- CPs$fit_value
-    idx.list <- InPAS:::adjust_proximalCPsByNBC(
+    idx.list <- adjust_proximalCPsByNBC(
       idx.list, cov_diff.list,
       seqnames, starts, strands,
       genome,
@@ -135,7 +135,7 @@ adjust_proximalCPs <- function(CPs,
   } else if (is(PolyA_PWM, "matrix")) {
     ## improvement needed here because only test if one sequence around position
     ## a hit by PWM matrix with score  > 70%
-    idx.list <- InPAS:::adjust_proximalCPsByPWM(
+    idx.list <- adjust_proximalCPsByPWM(
       idx.list, PolyA_PWM, seqnames, starts,
       strands, genome, shift_range,
       search_point_START

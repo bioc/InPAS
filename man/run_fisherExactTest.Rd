@@ -7,7 +7,7 @@
 run_fisherExactTest(UTR3eset, gp1, gp2)
 }
 \arguments{
-\item{UTR3eset}{An object of \linkS4class{UTR3eSet}, output of \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}}
+\item{UTR3eset}{An object of \link[=UTR3eSet-class]{UTR3eSet}, output of \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}}
 
 \item{gp1}{tag names of group 1}
 

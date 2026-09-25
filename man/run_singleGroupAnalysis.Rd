@@ -7,7 +7,7 @@
 run_singleGroupAnalysis(UTR3eset)
 }
 \arguments{
-\item{UTR3eset}{An object of \linkS4class{UTR3eSet}, output of \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}}
+\item{UTR3eset}{An object of \link[=UTR3eSet-class]{UTR3eSet}, output of \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}}
 }
 \value{
 a matrix of test results
@@ -16,9 +16,11 @@ a matrix of test results
 do analysis for single group samples by ANOVA test
 }
 \examples{
+\dontrun{
 path <- system.file("extdata", package = "InPAS")
 load(file.path(path, "eset.MAQC.rda"))
 res <- InPAS:::run_singleGroupAnalysis(eset)
+}
 }
 \author{
 Jianhong Ou

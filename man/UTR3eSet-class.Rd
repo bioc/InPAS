@@ -10,9 +10,9 @@
 \alias{show,UTR3eSet-method}
 \title{UTR3eSet-class and its methods}
 \description{
-An object of class \linkS4class{UTR3eSet} representing the results of 3' UTR usage;
+An object of class \link[=UTR3eSet-class]{UTR3eSet} representing the results of 3' UTR usage;
 methods for constructing, showing, getting and setting attributes of objects;
-methods for coercing object of other class to \linkS4class{UTR3eSet} objects.
+methods for coercing object of other class to \link[=UTR3eSet-class]{UTR3eSet} objects.
 }
 \section{Objects from the Class}{
 

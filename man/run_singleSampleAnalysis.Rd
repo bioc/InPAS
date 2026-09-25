@@ -21,12 +21,14 @@ the test will be performed by comparing a two-state versus an
 one-state Poisson Hidden Markov models.
 }
 \examples{
+\dontrun{
 path <- system.file("extdata", package = "InPAS")
 load(file.path(path, "eset.MAQC.rda"))
 res <- InPAS:::run_singleSampleAnalysis(eset)
 }
+}
 \seealso{
-\linkS4class{UTR3eSet}, \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}, \code{\link[depmixS4:depmix]{depmixS4::depmix()}}
+\link[=UTR3eSet-class]{UTR3eSet}, \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}, \code{\link[depmixS4:depmix]{depmixS4::depmix()}}
 }
 \author{
 Jianhong Ou

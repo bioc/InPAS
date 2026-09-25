@@ -66,7 +66,7 @@ detected and the 3' end excluded by setting cutEnd/search_point_END is small.}
 
 \item{adjust_distal_polyA_end}{A logical(1) vector. If true, distal CP sites
 are subject to adjustment by the Naive Bayes classifier from the
-\link[cleanUpdTSeq:cleanUpdTSeq]{cleanUpdTSeq::cleanUpdTSeq-package}}
+\link[cleanUpdTSeq:cleanUpdTSeq-package]{cleanUpdTSeq::cleanUpdTSeq-package}}
 
 \item{long_coverage_threshold}{An integer(1) vector, specifying the cutoff
 threshold of coverage for the terminal of long form 3' UTRs. If the coverage

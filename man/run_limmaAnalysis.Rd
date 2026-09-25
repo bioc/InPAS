@@ -14,7 +14,7 @@ run_limmaAnalysis(
 )
 }
 \arguments{
-\item{UTR3eset}{An object of \linkS4class{UTR3eSet}, output of \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}}
+\item{UTR3eset}{An object of \link[=UTR3eSet-class]{UTR3eSet}, output of \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}}
 
 \item{design}{A design matrix of the experiment, with rows corresponding to
 arrays and columns to coefficients to be estimated. Defaults to the unit
@@ -27,7 +27,7 @@ one contrast. see \code{\link[limma:makeContrasts]{limma::makeContrasts()}}}
 
 \item{coef}{An integer(1) vector specifying which coefficient or a character(1)
 vector specifying which contrast of the linear model is to test. see more
-\code{\link[limma:toptable]{limma::topTable()}}. Default, 1.}
+\code{\link[limma:topTable]{limma::topTable()}}. Default, 1.}
 
 \item{robust}{A logical(1) vector,indicating whether the estimation of the
 empirical Bayes prior parameters be robustified against outlier sample
@@ -37,8 +37,8 @@ variances?}
 }
 \value{
 fit results of eBayes by limma. It is an object of class
-\link[limma:marraylm]{limma::MArrayLM} containing everything found by fit. see
-\code{\link[limma:ebayes]{limma::eBayes()}}
+\link[limma:MArrayLM-class]{limma::MArrayLM} containing everything found by fit. see
+\code{\link[limma:eBayes]{limma::eBayes()}}
 }
 \description{
 use limma to analyze the PDUI

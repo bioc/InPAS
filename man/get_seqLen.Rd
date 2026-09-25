@@ -22,12 +22,14 @@ Get sequence lengths for chromosomes/scaffolds from a
 \link[BSgenome:BSgenome-class]{BSgenome::BSgenome} object
 }
 \examples{
+\dontrun{
 library(BSgenome.Mmusculus.UCSC.mm10)
 genome <- BSgenome.Mmusculus.UCSC.mm10
-InPAS:::get_seqLen(
+get_seqLen(
   genome = genome,
   chr2exclude = "chrM"
 )
+}
 }
 \seealso{
 \link[Seqinfo:Seqinfo-class]{Seqinfo::Seqinfo}

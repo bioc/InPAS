@@ -73,7 +73,7 @@ adjust_proximalCPsByNBC <- function(idx.list,
   pos.matrix <- do.call(rbind, pos.matrix)
 
   if (is(pos.matrix, "matrix") && nrow(pos.matrix) > 0) {
-    idx <- InPAS:::get_PAscore2(
+    idx <- get_PAscore2(
       seqnames[pos.matrix[, "ID"]],
       pos.matrix[, "pos"],
       strands[pos.matrix[, "ID"]],

@@ -18,7 +18,7 @@ test_dPDUI(
 )
 }
 \arguments{
-\item{eset}{An object of \linkS4class{UTR3eSet}. It is an output of
+\item{eset}{An object of \link[=UTR3eSet-class]{UTR3eSet}. It is an output of
 \code{\link[=get_UTR3eSet]{get_UTR3eSet()}}}
 
 \item{sqlite_db}{A path to the SQLite database for InPAS, i.e. the output of
@@ -44,7 +44,7 @@ there is only one contrast. see \code{\link[limma:makeContrasts]{limma::makeCont
 limma-based analysis.}
 
 \item{coef}{column number or column name specifying which coefficient or
-contrast of the linear model is of interest. see more \code{\link[limma:toptable]{limma::topTable()}}.
+contrast of the linear model is of interest. see more \code{\link[limma:topTable]{limma::topTable()}}.
 default value: 1}
 
 \item{robust}{A logical(1) vector, indicating whether the estimation of the empirical Bayes prior
@@ -53,7 +53,7 @@ parameters should be robustified against outlier sample variances.}
 \item{...}{other arguments are passed to lmFit}
 }
 \value{
-An object of \linkS4class{UTR3eSet}, with the last element \code{testRes} containing the test results in a matrix.
+An object of \link[=UTR3eSet-class]{UTR3eSet}, with the last element \code{testRes} containing the test results in a matrix.
 }
 \description{
 do test for dPDUI

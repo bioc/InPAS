@@ -36,7 +36,7 @@ adjust_proximalCPsByPWM <- function(idx,
       pos <- {
         if (strand == "+") start + id - 1 else start - id + 1
       }
-      id <- InPAS:::get_PAscore(seqname, pos, strand,
+      id <- get_PAscore(seqname, pos, strand,
         id,
         PWM = PolyA_PWM,
         genome = genome,

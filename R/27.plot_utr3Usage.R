@@ -1,7 +1,7 @@
 #' Visualize the dPDUI events using ggplot2
 #'
 #' Visualize the dPDUI events by plotting the MSE, and total coverage per group
-#' along 3' UTR regions with dPDUI using [ggplot2::geom_line ()].
+#' along 3' UTR regions with dPDUI using [ggplot2::geom_line].
 #'
 #' @param usage_data An object of [GenomicRanges::GRanges-class], an output from
 #'   [get_usage4plot()].
@@ -11,8 +11,7 @@
 #'   proximal CP site. Default, dashed. See \href{https://cran.r-project.org/web/packages/ggplot2/vignettes/ggplot2-specs.html}{ggplot2 linetype}.
 #'
 #' @return A ggplot object for refined plotting
-#' @importFrom ggplot2 ggplot geom_line geom_vline facet_grid ylab ggtitle theme
-#'   element_text aes vars
+#' @importFrom ggplot2 ggplot geom_line geom_vline facet_grid ylab ggtitle theme element_text aes vars
 #' @export
 #' @author Haibo Liu
 #' @seealso For example, see [get_usage4plot()].

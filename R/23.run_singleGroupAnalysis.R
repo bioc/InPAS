@@ -8,9 +8,11 @@
 #' @keywords internal
 #' @author Jianhong Ou
 #' @examples
+#' \dontrun{
 #' path <- system.file("extdata", package = "InPAS")
 #' load(file.path(path, "eset.MAQC.rda"))
 #' res <- InPAS:::run_singleGroupAnalysis(eset)
+#' }
 run_singleGroupAnalysis <- function(UTR3eset) {
   data.long <- UTR3eset$long
   data.short <- UTR3eset$short

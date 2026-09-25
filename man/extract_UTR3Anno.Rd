@@ -36,7 +36,7 @@ known CP sites to a nearest downstream exon. Default is 10 kb for mammalian
 genomes. For other species, user need to adjust this parameter.}
 }
 \value{
-An object of \link[GenomicRanges:GRangesList-class]{GenomicRanges::GRangesList}, containing GRanges for
+An object of \link[GenomicRanges:GRangesList]{GenomicRanges::GRangesList}, containing GRanges for
 extracted 3' UTRs, and the corresponding last CDSs and next.exon.gap for
 each chromosome/scaffold. Chromosome
 }

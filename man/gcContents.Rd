@@ -25,7 +25,7 @@ helper function to calculate chromosome/scaffold level GC content
 \dontrun{
 library(BSgenome.Mmusculus.UCSC.mm10)
 genome <- BSgenome.Mmusculus.UCSC.mm10
-InPAS:::gcContents(genome, "chr1")
+gcContents(genome, "chr1")
 }
 
 }

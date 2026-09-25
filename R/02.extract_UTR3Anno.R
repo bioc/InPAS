@@ -26,11 +26,9 @@
 #'   genomes. For other species, user need to adjust this parameter.
 #' @import GenomicRanges
 #' @importFrom IRanges IRanges
-#' @importFrom plyranges as_granges complement_ranges disjoin_ranges
-#' reduce_ranges reduce_ranges_directed remove_names 
-#' set_genome_info shift_downstream
-#' @importFrom dplyr as_tibble mutate filter arrange bind_rows group_by
-#'   left_join summarise n
+#' @importFrom plyranges as_granges complement_ranges disjoin_ranges reduce_ranges reduce_ranges_directed remove_names set_genome_info shift_downstream
+#' @importFrom dplyr as_tibble mutate filter arrange bind_rows group_by left_join summarise n
+#' @importFrom Seqinfo seqnames seqlengths isCircular
 #'
 #' @author Jianhong Ou, Haibo Liu
 #' @return An object of [GenomicRanges::GRangesList], containing GRanges for
@@ -513,14 +511,19 @@ extract_UTR3Anno <- function(sqlite_db,
   } else {
     genome.info <- as.data.frame(seqinfo(TxDb))[, 1:2]
   }
-  genome.info <- genome.info[!rownames(genome.info) %in% chr2exclude, ]
-
+  if (is(genome, "BSgenome")) {
+    genome.info <- seqinfo(genome)
+  } else {
+    genome.info <- seqinfo(TxDb)
+  }
+  genome.info <- genome.info[seqnames(genome.info)[!seqnames(genome.info) %in% chr2exclude], ]
+  
   gaps <- tx %>%
     plyranges::reduce_ranges() %>%
     plyranges::set_genome_info(
-      seqnames = rownames(genome.info),
-      seqlengths = genome.info$seqlengths,
-      is_circular = genome.info$isCircular
+      seqnames = seqnames(genome.info),
+      seqlengths = seqlengths(genome.info),
+      is_circular = isCircular(genome.info)
     ) %>% plyranges::complement_ranges()
   
   utr3.clean.intact <- utr3.clean[!utr3.clean$truncated]

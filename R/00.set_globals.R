@@ -261,7 +261,7 @@ getInPASOutputDirectory <- function() {
 #' @param genome An object [BSgenome::BSgenome-class]. To make things easy, we
 #'   suggest users creating a [BSgenome::BSgenome-class] instance from the
 #'   reference genome used for read alignment. For details, see the
-#'   documentation of [BSgenome::forgeBSgenomeDataPkg()].
+#'   documentation of [BSgenomeForge::forgeBSgenomeDataPkg()].
 #' @param TxDb An object of [GenomicFeatures::TxDb-class]
 #' @param EnsDb An object of [ensembldb::EnsDb-class]
 #' @param outdir A character(1) vector, a path with write permission for storing

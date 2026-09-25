@@ -330,7 +330,7 @@ search_CPs <- function(seqname,
         " distal searching starts at ", date(), ".\n"
       )
     }
-    chr.abun <- InPAS:::search_distalCPs(chr.cov.merge,
+    chr.abun <- search_distalCPs(chr.cov.merge,
       conn_next_utr3,
       curr_UTR,
       window_size = window_size,
@@ -354,7 +354,7 @@ search_CPs <- function(seqname,
             " proximal searching starts at ", date(), ".\n"
         )
     }
-    chr.abun <- InPAS:::search_proximalCPs(
+    chr.abun <- search_proximalCPs(
       chr.abun, curr_UTR,
       window_size, MINSIZE,
       cutEnd, search_point_START,
@@ -377,7 +377,7 @@ search_CPs <- function(seqname,
       )
     }
     if (adjust_distal_polyA_end) {
-      chr.abun <- InPAS:::adjust_distalCPs(
+      chr.abun <- adjust_distalCPs(
         chr.abun,
         classifier,
         classifier_cutoff,
@@ -400,7 +400,7 @@ search_CPs <- function(seqname,
         " proximal adjusting starts at ", date(), ".\n"
       )
     }
-    chr.abun <- InPAS:::adjust_proximalCPs(
+    chr.abun <- adjust_proximalCPs(
       chr.abun, PolyA_PWM,
       genome, classifier,
       classifier_cutoff,

@@ -25,7 +25,7 @@ It can be "none", "quantiles", "quantiles.robust", "mean", or "median"}
 for analysis in a singleSample mode? Default, FALSE}
 }
 \value{
-An object of \linkS4class{UTR3eSet} which contains following elements:
+An object of \link[=UTR3eSet-class]{UTR3eSet} which contains following elements:
 usage: an \link[GenomicRanges:GRanges-class]{GenomicRanges::GRanges} object with CP sites info. PDUI: a
 matrix of PDUI PDUI.log2: log2 transformed PDUI matrix short: a matrix of
 usage of short form long: a matrix of usage of long form if singleSample is

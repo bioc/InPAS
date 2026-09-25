@@ -14,12 +14,14 @@
 #' @keywords internal
 #' @author Jianhong Ou, Haibo Liu
 #' @examples
+#' \dontrun{
 #' library(BSgenome.Mmusculus.UCSC.mm10)
 #' genome <- BSgenome.Mmusculus.UCSC.mm10
-#' InPAS:::get_seqLen(
+#' get_seqLen(
 #'   genome = genome,
 #'   chr2exclude = "chrM"
 #' )
+#' }
 get_seqLen <- function(genome = getInPASGenome(),
                        chr2exclude = getChr2Exclude()) {
   if (!is(genome, "BSgenome")) {

@@ -17,11 +17,8 @@
 #'   genomes. For other species, user need to adjust this parameter.
 #' @import GenomicRanges
 #' @importFrom IRanges IRanges
-#' @importFrom plyranges as_granges complement_ranges disjoin_ranges
-#' reduce_ranges reduce_ranges_directed remove_names
-#' set_genome_info shift_downstream
-#' @importFrom dplyr as_tibble mutate filter arrange bind_rows group_by
-#'   left_join summarise n
+#' @importFrom plyranges as_granges complement_ranges disjoin_ranges reduce_ranges reduce_ranges_directed remove_names set_genome_info shift_downstream
+#' @importFrom dplyr as_tibble mutate filter arrange bind_rows group_by left_join summarise n
 #' @return A BED file with 6 columns: chr, chrStart, chrEnd, name, score, and
 #'   strand.
 #' @export

@@ -17,7 +17,7 @@ setup_GSEA(
 )
 }
 \arguments{
-\item{eset}{A \linkS4class{UTR3eSet} object, output of \code{\link[=test_dPDUI]{test_dPDUI()}}}
+\item{eset}{A \link[=UTR3eSet-class]{UTR3eSet} object, output of \code{\link[=test_dPDUI]{test_dPDUI()}}}
 
 \item{groupList}{A list of grouped sample tag names, with the group names as
 the list's name, such as list(groupA = c("sample_1", "sample_2",

@@ -33,7 +33,7 @@ Calculate read weights for GC composition-based coverage correction
 \dontrun{
 library(BSgenome.Mmusculus.UCSC.mm10)
 genome <- BSgenome.Mmusculus.UCSC.mm10
-InPAS:::gcComp(genome, "chr1")
+gcComp(genome, "chr1")
 }
 
 }

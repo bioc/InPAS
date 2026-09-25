@@ -28,9 +28,7 @@
 #' }
 #'
 #' @name UTR3eSet-class
-#' @aliases UTR3eSet-class $,UTR3eSet-method $<-,UTR3eSet-method
-#' coerce,UTR3eSet,ExpressionSet-method coerce,UTR3eSet,GRanges-method
-#' show,UTR3eSet-method
+#' @aliases UTR3eSet-class $,UTR3eSet-method $<-,UTR3eSet-method coerce,UTR3eSet,ExpressionSet-method coerce,UTR3eSet,GRanges-method show,UTR3eSet-method
 #' @docType class
 #' @section Objects from the Class: Objects can be created by calls of the form
 #' \code{new("UTR3eSet", ...)}.

@@ -9,7 +9,7 @@
 #' @param genome an object [BSgenome::BSgenome-class]. To make things easy, we
 #'   suggest users creating a [BSgenome::BSgenome-class] instance from the
 #'   reference genome used for read alignment. For details, see the
-#'   documentation of [BSgenome::forgeBSgenomeDataPkg()].
+#'   documentation of [BSgenomeForge::forgeBSgenomeDataPkg()].
 #' @param sqlite_db A path to the SQLite database for InPAS, i.e. the output of
 #'   [setup_sqlitedb()].
 #' @param future.chunk.size The average number of elements per future

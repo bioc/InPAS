@@ -46,101 +46,139 @@ import(limma)
 import(methods)
 import(readr)
 importFrom(AnnotationDbi,mapIds)
-importFrom(BSgenome,getSeq)
-importFrom(BSgenome,matchPWM)
-importFrom(Biostrings,DNAString)
-importFrom(Biostrings,alphabetFrequency)
-importFrom(Biostrings,letterFrequencyInSlidingView)
-importFrom(Biostrings,toString)
-importFrom(GenomeInfoDb,mapSeqlevels)
-importFrom(GenomeInfoDb,seqlevelsStyle)
-importFrom(IRanges,IRanges)
-importFrom(IRanges,Views)
-importFrom(IRanges,viewApply)
-importFrom(IRanges,viewMeans)
-importFrom(Seqinfo,seqlengths)
-importFrom(Seqinfo,seqlevels)
-importFrom(batchtools,batchMap)
-importFrom(batchtools,makeClusterFunctionsInteractive)
-importFrom(batchtools,makeClusterFunctionsLSF)
-importFrom(batchtools,makeClusterFunctionsMulticore)
-importFrom(batchtools,makeClusterFunctionsOpenLava)
-importFrom(batchtools,makeClusterFunctionsSGE)
-importFrom(batchtools,makeClusterFunctionsSlurm)
-importFrom(batchtools,makeClusterFunctionsSocket)
-importFrom(batchtools,makeClusterFunctionsTORQUE)
-importFrom(batchtools,makeRegistry)
-importFrom(batchtools,reduceResultsList)
-importFrom(batchtools,submitJobs)
-importFrom(batchtools,waitForJobs)
-importFrom(cleanUpdTSeq,buildFeatureVector)
-importFrom(cleanUpdTSeq,predictTestSet)
-importFrom(depmixS4,depmix)
-importFrom(depmixS4,fit)
-importFrom(depmixS4,getpars)
-importFrom(depmixS4,posterior)
-importFrom(dplyr,arrange)
-importFrom(dplyr,as_tibble)
-importFrom(dplyr,bind_cols)
-importFrom(dplyr,bind_rows)
-importFrom(dplyr,desc)
-importFrom(dplyr,filter)
-importFrom(dplyr,group_by)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,n)
-importFrom(dplyr,pull)
-importFrom(dplyr,select)
-importFrom(dplyr,summarise)
-importFrom(dplyr,syms)
-importFrom(future,multicore)
-importFrom(future,multisession)
-importFrom(future,plan)
-importFrom(future.apply,future_lapply)
-importFrom(future.apply,future_mapply)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,element_text)
-importFrom(ggplot2,facet_grid)
-importFrom(ggplot2,geom_line)
-importFrom(ggplot2,geom_vline)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,ggtitle)
-importFrom(ggplot2,theme)
-importFrom(ggplot2,vars)
-importFrom(ggplot2,ylab)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,pdf)
-importFrom(grDevices,rainbow)
-importFrom(graphics,abline)
-importFrom(graphics,hist)
-importFrom(graphics,legend)
-importFrom(graphics,lines)
+importFrom(BSgenome,
+  getSeq,
+  matchPWM
+)
+importFrom(Biostrings,
+  DNAString,
+  alphabetFrequency,
+  letterFrequencyInSlidingView,
+  toString
+)
+importFrom(GenomeInfoDb,
+  mapSeqlevels,
+  seqlevelsStyle
+)
+importFrom(IRanges,
+  IRanges,
+  Views,
+  viewApply,
+  viewMeans
+)
+importFrom(Seqinfo,
+  isCircular,
+  seqlengths,
+  seqlevels,
+  seqnames
+)
+importFrom(batchtools,
+  batchMap,
+  makeClusterFunctionsInteractive,
+  makeClusterFunctionsLSF,
+  makeClusterFunctionsMulticore,
+  makeClusterFunctionsOpenLava,
+  makeClusterFunctionsSGE,
+  makeClusterFunctionsSlurm,
+  makeClusterFunctionsSocket,
+  makeClusterFunctionsTORQUE,
+  makeRegistry,
+  reduceResultsList,
+  submitJobs,
+  waitForJobs
+)
+importFrom(cleanUpdTSeq,
+  buildFeatureVector,
+  predictTestSet
+)
+importFrom(depmixS4,
+  depmix,
+  fit,
+  getpars,
+  posterior
+)
+importFrom(dplyr,
+  arrange,
+  as_tibble,
+  bind_cols,
+  bind_rows,
+  desc,
+  filter,
+  group_by,
+  left_join,
+  mutate,
+  n,
+  pull,
+  select,
+  summarise,
+  syms
+)
+importFrom(future,
+  multicore,
+  multisession,
+  plan
+)
+importFrom(future.apply,
+  future_lapply,
+  future_mapply
+)
+importFrom(ggplot2,
+  aes,
+  element_text,
+  facet_grid,
+  geom_line,
+  geom_vline,
+  ggplot,
+  ggtitle,
+  theme,
+  vars,
+  ylab
+)
+importFrom(grDevices,
+  dev.off,
+  pdf,
+  rainbow
+)
+importFrom(graphics,
+  abline,
+  hist,
+  legend,
+  lines
+)
 importFrom(magrittr,"%>%")
 importFrom(parallelly,availableCores)
-importFrom(plyranges,as_granges)
-importFrom(plyranges,complement_ranges)
-importFrom(plyranges,disjoin_ranges)
-importFrom(plyranges,reduce_ranges)
-importFrom(plyranges,reduce_ranges_directed)
-importFrom(plyranges,remove_names)
-importFrom(plyranges,set_genome_info)
-importFrom(plyranges,shift_downstream)
-importFrom(preprocessCore,colSummarizeAvg)
-importFrom(preprocessCore,colSummarizeMedian)
-importFrom(preprocessCore,normalize.quantiles)
-importFrom(preprocessCore,normalize.quantiles.robust)
+importFrom(plyranges,
+  as_granges,
+  complement_ranges,
+  disjoin_ranges,
+  reduce_ranges,
+  reduce_ranges_directed,
+  remove_names,
+  set_genome_info,
+  shift_downstream
+)
+importFrom(preprocessCore,
+  colSummarizeAvg,
+  colSummarizeMedian,
+  normalize.quantiles,
+  normalize.quantiles.robust
+)
 importFrom(reshape2,melt)
-importFrom(stats,BIC)
-importFrom(stats,density)
-importFrom(stats,fft)
-importFrom(stats,fisher.test)
-importFrom(stats,loess.smooth)
-importFrom(stats,model.matrix)
-importFrom(stats,p.adjust)
-importFrom(stats,pnorm)
-importFrom(stats,poisson)
-importFrom(stats,smooth.spline)
-importFrom(stats,t.test)
-importFrom(utils,packageVersion)
-importFrom(utils,read.delim)
-importFrom(utils,write.table)
+importFrom(stats,
+  BIC,
+  density,
+  fft,
+  fisher.test,
+  loess.smooth,
+  model.matrix,
+  p.adjust,
+  pnorm,
+  poisson,
+  smooth.spline,
+  t.test
+)
+importFrom(utils,
+  packageVersion,
+  read.delim,
+  write.table
+)

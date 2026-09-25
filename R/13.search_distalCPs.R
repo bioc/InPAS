@@ -160,7 +160,7 @@ search_distalCPs <- function(chr.cov.merge,
     ## remove utr3---___---utr3, need to improve.
     if (conn_next_utr && length(next.exon.gap) > 50) {
       ## find split position by the deepest valley in coverage profile
-      next.exon.gap <- InPAS:::remove_convergentUTR3s(next.exon.gap)
+      next.exon.gap <- remove_convergentUTR3s(next.exon.gap)
       conn_next_utr <- FALSE
     }
     

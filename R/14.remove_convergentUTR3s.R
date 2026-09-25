@@ -12,7 +12,7 @@
 
 remove_convergentUTR3s <- function(x) {
   if (length(x) > 100) {
-    id <- InPAS:::find_valleyBySpline(x,
+    id <- find_valleyBySpline(x,
       ss = 1,
       se = length(x), 
       n = 1,

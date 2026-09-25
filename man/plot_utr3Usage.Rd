@@ -21,7 +21,7 @@ A ggplot object for refined plotting
 }
 \description{
 Visualize the dPDUI events by plotting the MSE, and total coverage per group
-along 3' UTR regions with dPDUI using \code{\link[ggplot2:geom_path]{ggplot2::geom_line ()}}.
+along 3' UTR regions with dPDUI using \link[ggplot2:geom_line]{ggplot2::geom_line}.
 }
 \seealso{
 For example, see \code{\link[=get_usage4plot]{get_usage4plot()}}.

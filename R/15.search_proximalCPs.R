@@ -125,7 +125,7 @@ search_proximalCPs <- function(CPs,
 
   ## find proximal CP sites if the utr3 is valid in term of length
   fit_value[flag] <- mapply(function(.ele, search_point_END) {
-    cov_diff <- apply(.ele, 2, InPAS:::calculate_mse,
+    cov_diff <- apply(.ele, 2, calculate_mse,
       search_point_START = search_point_START,
       search_point_END = search_point_END
     )
@@ -138,7 +138,7 @@ search_proximalCPs <- function(CPs,
 
   Predicted_Proximal_APA[flag] <-
     mapply(function(cov_diff, search_point_END) {
-      idx <- InPAS:::find_valleyBySpline(cov_diff,
+      idx <- find_valleyBySpline(cov_diff,
         search_point_START,
         search_point_END,
         n = 1,  #be more accurate, only return the one with minimal MSE

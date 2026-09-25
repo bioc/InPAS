@@ -78,7 +78,7 @@ adjust_distalCPs <- function(distalCPs,
     )
     gap.cov <- do.call(rbind, gap.cov)
     if (length(gap.cov) > 0) {
-      idx <- InPAS:::get_PAscore2(
+      idx <- get_PAscore2(
         dCPs$seqnames[gap.cov[, "ID"]],
         gap.cov[, "pos"],
         dCPs$strand[gap.cov[, "ID"]],

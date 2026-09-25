@@ -17,7 +17,7 @@ filter_testOut(
 )
 }
 \arguments{
-\item{res}{a \linkS4class{UTR3eSet} object, output of \code{\link[=test_dPDUI]{test_dPDUI()}}}
+\item{res}{a \link[=UTR3eSet-class]{UTR3eSet} object, output of \code{\link[=test_dPDUI]{test_dPDUI()}}}
 
 \item{gp1}{tag names involved in group 1. gp1 and gp2 are used for filtering
 purpose if both are specified; otherwise only other specified thresholds

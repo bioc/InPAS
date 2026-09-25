@@ -20,14 +20,14 @@ element of the output of \code{\link[=extract_UTR3Anno]{extract_UTR3Anno()}} for
 \item{chr.totalCov}{total coverage for each condition of a given chromosome. It
 must be an output of \code{\link[=get_totalCov]{get_totalCov()}}}
 
+\item{gcCompensation}{GC compensation vector. Not support yet.}
+
 \item{mappabilityCompensation}{mappability compensation vector. Not support
 yet.}
 
 \item{FFT}{Use FFT smooth or not.}
 
 \item{fft.sm.power}{the cut-off frequency of FFT smooth.}
-
-\item{gcCompensationensation}{GC compensation vector. Not support yet.}
 }
 \value{
 path to a file storing the UTR3 total coverage for a given
